@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-1 Duplicate charge — approve",
+  "description": "Matching sibling transaction: the duplicate rule approves and queues outreach. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-1. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-1 (duplicate_or_incorrect) disputes EVL-TX-1A ($89.20, EvalMart) and a sibling transaction EVL-TX-1B posted one day later for the identical amount at the same merchant. The task must: claim EVL-BO-1, load evidence, decide auto_approve citing the matching sibling transaction, then call case-notify, then complete with a summary naming the outcome and provisional credit. Fail ONLY if: (a) the outcome recorded via case-decide is not auto_approve; (b) case-decide errors are ignored rather than reported; (c) case-notify is never called after a successful decision; (d) the summary invents facts.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

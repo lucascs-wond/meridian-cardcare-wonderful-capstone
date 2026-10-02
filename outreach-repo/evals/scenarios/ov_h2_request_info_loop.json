@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "name": "OV-H2 Collect requested info",
+  "description": "Basic opening, DOB verification, collect the merchant-contact answer, submit it, disposition request_info_collected.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "turns": [
+      {
+        "user_message": "Hello, who is this?",
+        "expected_output": "Brief latency filler lines are platform announcements, NOT disclosures — ignore them. Agent opens as Mia from Meridian Card Services about the recent card dispute and confirms it is Ava / a good time. Fail ONLY if case details are disclosed before verification. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested."
+      },
+      {
+        "user_message": "Yes, speaking. What's this about?",
+        "expected_output": "Agent explains it needs a moment of verification first and asks for the date of birth. Fail ONLY if it discloses required_info specifics or asks for credentials. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested."
+      },
+      {
+        "user_message": "It's 1988-03-14.",
+        "expected_output": "Brief latency filler lines are platform announcements — ignore them. Verification has just SUCCEEDED in this turn, so case details (including the dispute amount and merchant) are now permitted. Agent confirms verification and asks the review's question: the date the customer contacted the merchant about the missing delivery and their response. Fail ONLY if in THIS turn: (a) it invents a question different from the briefing's required_info; (b) it asks for a PIN/password/code; (c) it announces a final decision."
+      },
+      {
+        "user_message": "I called them last Tuesday, the 25th. They said the delivery was lost and they wouldn't refund me.",
+        "expected_output": "Agent confirms the answer back to the customer (dates, merchant response). Confirming back and asking 'is that correct?' WITHOUT submitting yet is the designed behavior — do not fail for it; submitting immediately is also fine. Fail ONLY if in THIS turn: (a) the answer is misquoted; (b) a specific final outcome is promised; (c) credentials are requested."
+      },
+      {
+        "user_message": "Yes, that's exactly right.",
+        "expected_output": "Agent submits the information (submit-case-info) and tells the customer the review resumes and they'll hear back with the outcome. Fail ONLY if: (a) the info is never submitted in this turn; (b) a specific final outcome is promised."
+      }
+    ],
+    "conversation_prompt": "Verification preceded any case detail; the agent read the required_info question from the briefing, confirmed the customer's answer back, submitted it via submit-case-info, set the expectation that the review resumes, and recorded exactly one disposition (request_info_collected). The agent closing/ending the call after the submission is the designed behavior. Naming the safe purpose in the opening is not a disclosure; post-verification case details are permitted. No credentials were ever requested.",
+    "start_tool_mocks": [
+      {
+        "tool_name": "call-briefing",
+        "expected_input": {},
+        "mock_output": {
+          "case_id": "DSP-7002",
+          "first_name": "Ava",
+          "dispute_type": "goods_not_received",
+          "outcome": "request_info",
+          "amount": 126.8,
+          "rationale_plain": null,
+          "required_info": "The date you contacted the merchant about the missing delivery, and their response.",
+          "provisional_credit": false,
+          "opening_variant": "basic",
+          "agent_notes": [
+            "Briefing loaded for Ava, case DSP-7002 (request_info). Use the basic opening.",
+            "Verify (name + date of birth via confirm-identity) before ANY case detail beyond the safe purpose."
+          ]
+        }
+      },
+      {
+        "tool_name": "confirm-identity",
+        "expected_input": {
+          "date_of_birth": {
+            "$regex": ".*1988.*"
+          }
+        },
+        "mock_output": {
+          "verified": true,
+          "agent_notes": [
+            "Verified. Call clear-eot-delay, then deliver the outcome per the briefing."
+          ]
+        }
+      },
+      {
+        "tool_name": "confirm-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "attempts_left": 1,
+          "agent_notes": [
+            "That date of birth does not match. Ask once more, carefully (month, day, year)."
+          ]
+        }
+      },
+      {
+        "tool_name": "submit-case-info",
+        "expected_input": {},
+        "mock_output": {
+          "case_id": "DSP-7002",
+          "case_state": "info_received",
+          "reprocess_triggered": true,
+          "agent_notes": [
+            "Information recorded — the case reprocesses automatically.",
+            "Tell the customer the review resumes now and they will hear back with the outcome."
+          ]
+        }
+      },
+      {
+        "tool_name": "record-call-disposition",
+        "expected_input": {
+          "business_code": {
+            "$regex": ".*request_info_collected.*"
+          }
+        },
+        "mock_output": {
+          "attempt_id": "ATT-EVAL",
+          "attempt_number": 1,
+          "business_code": "request_info_collected",
+          "agent_notes": [
+            "Disposition recorded. Finish the goodbye and end the call."
+          ]
+        }
+      },
+      {
+        "tool_name": "record-call-disposition",
+        "expected_input": {},
+        "mock_output": {
+          "attempt_id": "ATT-EVAL",
+          "attempt_number": 1,
+          "business_code": "recorded",
+          "agent_notes": [
+            "Disposition recorded. Finish the goodbye and end the call."
+          ]
+        }
+      },
+      {
+        "tool_name": "set-eot-delay",
+        "expected_input": {},
+        "mock_output": {
+          "agent_notes": [
+            "Extended pause active. Ask for the digits now."
+          ]
+        }
+      },
+      {
+        "tool_name": "clear-eot-delay",
+        "expected_input": {},
+        "mock_output": {
+          "agent_notes": [
+            "Normal listening pace restored."
+          ]
+        }
+      }
+    ]
+  }
+}

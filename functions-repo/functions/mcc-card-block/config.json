@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-card-block",
+  "description": "Meridian CardCare data plane: block a card for lost/stolen/suspected_fraud/travel_hold and optionally order a replacement. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-card-block",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

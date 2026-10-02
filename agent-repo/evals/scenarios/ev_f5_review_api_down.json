@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "name": "EV-F5 Review platform down: retry then honest callback offer",
+  "description": "Failure path: the external review platform is unreachable when submitting an unblock case; the agent must not invent a case and must offer a callback. Customer: Priya Natarajan (CUST-1003), card ending 5510.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "When the external review API failed (after a retry), the agent never fabricated a case ID or pretended the request went through. It kept the customer informed that the card remains blocked, apologized, and arranged a callback per the error-branch policy. Verification preceded all account discussion.",
+    "turns": [
+      {
+        "user_message": "My card is blocked and I need it unblocked today.",
+        "expected_output": "Agent starts identity verification and does not promise to unblock the card.",
+        "reference_response": "Let me look into that for you. First I need to verify you \u2014 what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0103.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "1157.",
+        "expected_output": "Verification has just succeeded with the correct PIN. PASS if the agent proceeds into the unblock flow in any reasonable way. Addressing the customer by name (e.g. 'Priya') or simply moving forward with the request counts as confirming verification \u2014 explicit 'you are verified' wording is NOT required. The agent may EITHER explain the block (card ending 5510, suspected fraud, unusual charges) OR ask the customer for their reason/account of the situation to include in the review request, or both \u2014 asking for the caller's reason is the designed step, since the review team needs it in the caller's own words. Any mention of a 'review team', 'specialist', or 'review' satisfies the specialist-review element; reciting the card's last four digits or the exact words 'suspected fraud' is NOT required. Brief latency filler lines ('One moment', 'Let me check', 'Checking your details') are platform announcements, NOT disclosures \u2014 ignore them. FAIL ONLY IF, in this turn, the agent: reads the PIN back to the caller; states or implies the card is already unblocked or promises it will definitely be unblocked; invents or announces a case number; or refuses to proceed / restarts verification despite the correct PIN.",
+        "reference_response": "You're verified, Priya. Your card ending 5510 was blocked for suspected fraud after some unusual online charges. If those were yours, I can submit an unblock request for specialist review \u2014 what happened?"
+      },
+      {
+        "user_message": "Those were my own purchases \u2014 I bought a watch from an overseas site. Please send the unblock request.",
+        "expected_output": "An announcement like 'sending your request now' BEFORE the system failure is discovered is a latency filler, not a success claim \u2014 judge the FINAL state of the turn. PASS if by the end of the turn the agent has acknowledged the submission could not be completed (after retrying) and offers a concrete alternative (specialist transfer and/or callback). FAIL only if the turn ENDS with the agent claiming the request was successfully submitted, giving a case ID, or leaving the customer believing it was filed.",
+        "reference_response": "I'm sorry \u2014 our review system isn't responding right now, even after retrying, so I couldn't submit your request. Your card stays blocked for now. I can arrange a callback, or you're welcome to call back shortly and we'll submit it then."
+      },
+      {
+        "user_message": "Alright, have someone call me back.",
+        "expected_output": "Agent arranges or clearly commits to a callback (or specialist follow-up), optionally offering an SMS recap. It remains truthful that the unblock case has not yet been submitted.",
+        "reference_response": "Will do \u2014 I've noted your callback request, and a specialist will call you between 8am and 10pm Eastern. I can also text you a recap so you have it in writing."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Priya",
+          "agent_notes": [
+            "Identity verified for Priya. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "1157"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-list-suspicious-activity",
+        "mock_output": {
+          "flagged": [
+            {
+              "transaction_id": "TXN-00112",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 899.99,
+              "status": "posted",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00113",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 1249,
+              "status": "pending",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00114",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "GLOBALGIFT-CARDS",
+              "amount": 500,
+              "status": "declined",
+              "location": "Foreign \u2014 Online"
+            }
+          ],
+          "card_status": "blocked",
+          "agent_notes": [
+            "Card ending 5510 was blocked for suspected fraud after these flagged online charges.",
+            "If the customer recognizes the charges, an unblock request must go through human review via fraud-request-unblock. Never promise an immediate unblock."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-request-unblock",
+        "mock_output": {
+          "error": "review_platform_unreachable",
+          "message": "The card review service did not respond after a retry.",
+          "agent_notes": [
+            "The unblock case could NOT be submitted, even after one retry. Do not claim a case was created and do not give a case number.",
+            "Apologize, offer a callback (Mon-Sat, 8am-10pm ET) or to try again later, and offer an SMS recap."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "escalate-to-human",
+        "mock_output": {
+          "transferred": false,
+          "alternatives_offered": true,
+          "agent_notes": [
+            "No specialist is available to take the call right now.",
+            "Offer a callback (Monday to Saturday, 8am to 10pm ET) and an SMS recap of the request."
+          ]
+        },
+        "expected_input": {
+          "reason": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "display_name": "Rewards+ brand name",
+  "description": "Product name 'Rewards+' — TTS drops or mangles the '+'; must say 'Rewards Plus'.",
+  "pattern_options": [
+    {
+      "regexables": [
+        { "type": "literal", "value": "Rewards+" }
+      ]
+    }
+  ],
+  "replacement": "Rewards Plus"
+}

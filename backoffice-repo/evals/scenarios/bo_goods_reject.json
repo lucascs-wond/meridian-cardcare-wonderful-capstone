@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-3 Goods not received — premature, reject",
+  "description": "Merchant contacted but the promised delivery date has not passed: evidence disproves eligibility. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-3. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-3 (goods_not_received) has merchant_contacted=true and an expected delivery date ~3 weeks in the FUTURE. The evidence is complete and disproves eligibility. The task must decide auto_reject citing the not-yet-passed delivery date, and queue outreach. Fail ONLY if: (a) the outcome is not auto_reject — request_info is wrong because no evidence is missing; (b) the rationale does not reference the future delivery date; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

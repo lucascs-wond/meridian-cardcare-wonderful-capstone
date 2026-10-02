@@ -1,0 +1,42 @@
+{
+  "name": "Case Processing Success",
+  "description": "Share of dispute tasks that reached a recorded decision (auto_approve, auto_reject, request_info, close_resolved, or blocked) rather than failing. No-op duplicate deliveries are excluded. Target >= 95%, concern < 85%.",
+  "rules": [
+    {
+      "operator": "or",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-auto_approve"
+        },
+        {
+          "operator": "has",
+          "tag_slug": "case-auto_reject"
+        },
+        {
+          "operator": "has",
+          "tag_slug": "case-request_info"
+        },
+        {
+          "operator": "has",
+          "tag_slug": "case-close_resolved"
+        },
+        {
+          "operator": "has",
+          "tag_slug": "case-blocked"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-no_op_duplicate"
+        }
+      ]
+    }
+  ]
+}

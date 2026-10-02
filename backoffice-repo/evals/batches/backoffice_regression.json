@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "Backoffice regression — dispute rulebook",
+  "description": "All Agent 2 scenarios: three dispute types plus the five mandatory edge cases, duplicate delivery, and the request_info reprocess loop. State-seeded: run scripts/seed_backoffice_cases.py first.",
+  "scenario_slugs": [
+    "bo_dup_approve",
+    "bo_fraud_approve",
+    "bo_goods_reject",
+    "bo_missing_evidence",
+    "bo_conflicting_evidence",
+    "bo_already_resolved",
+    "bo_cross_account",
+    "bo_duplicate_delivery",
+    "bo_reprocess_info"
+  ]
+}

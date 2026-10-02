@@ -1,0 +1,22 @@
+{
+  "name": "Channel / SMS Notified",
+  "category": "channel",
+  "description": "An outbound SMS confirmation (card blocked, unblock case received/decision, payment reminder) was sent during the interaction.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "type": "tool_succeeded",
+          "parameters": {
+            "tool_id": "send-sms-confirmation"
+          }
+        }
+      ]
+    }
+  ]
+}

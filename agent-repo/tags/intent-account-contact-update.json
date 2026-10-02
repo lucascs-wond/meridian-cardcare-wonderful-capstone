@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Account / Contact Update",
+  "category": "intent",
+  "description": "Caller asked to update their phone number, email address, or mailing address.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks to change or correct the phone number, email, or mailing address on their account, whether or not the update completed."
+  },
+  "rules": []
+}

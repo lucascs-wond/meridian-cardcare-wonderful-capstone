@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "name": "EV-H3 Unblock request creates human-review case",
+  "description": "Happy path: blocked card cannot be unblocked by the agent; a human-in-the-loop review case is created with a 4-business-hour SLA and SMS confirmation. Customer: Priya Natarajan (CUST-1003), card ending 5510 blocked for suspected fraud.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent never unblocked the card and never claimed it could \u2014 unblocks are human-in-the-loop only. After verification it submitted a review case via fraud-request-unblock, communicated the pending status and the 4-business-hour SLA, and sent the unblock_case_received SMS. No approval outcome was promised.",
+    "turns": [
+      {
+        "user_message": "My card just got declined at the grocery store. Fix it, please.",
+        "expected_output": "Brief latency filler lines like 'Let me pull up your account details' or 'One moment' are platform announcements, NOT account-data disclosures \u2014 ignore them. Agent responds with empathy and moves to identity verification BEFORE disclosing any account information. Willingness to help is fine. FAIL only if actual account data (card status, balances, transactions) is disclosed or an account action is performed before verification completes.",
+        "reference_response": "I'm sorry about that \u2014 let me take a look. First I need to verify you: what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0103.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "1157.",
+        "expected_output": "Agent confirms verification and explains the card ending 5510 is blocked for suspected fraud (referencing the flagged charges is a plus). It does NOT unblock the card and does not promise to.",
+        "reference_response": "You're verified, Priya. I can see your Mastercard ending 5510 was blocked for suspected fraud after some unusual online charges \u2014 two from LUXEWATCH and a declined gift-card purchase. Do you recognize those?"
+      },
+      {
+        "user_message": "Yes! Those are mine \u2014 I ordered a watch from an overseas site and forgot. Please unblock the card.",
+        "expected_output": "PASS if the agent routes the unblock through the human review team in any phrasing ('I'll send a request to our review team to get it unblocked' passes \u2014 the request going to a review team IS the 'cannot unblock myself' semantics; an explicit 'I can't unblock it' sentence is not required) and files or offers to file the request. FAIL only if the agent claims it can or did unblock the card directly, claims the card is already unblocked, or refuses to help.",
+        "reference_response": "I can't unblock it directly \u2014 for your security that needs a specialist review. I've submitted your request now; you'll have a decision within 4 business hours, and I've texted you a confirmation with your case number."
+      },
+      {
+        "user_message": "Okay. How will I know when it's done?",
+        "expected_output": "Agent explains the customer will be notified of the decision by text/SMS. Mentioning they can also call back to check status is a bonus, not required. Acceptable whether the request has already been submitted or is about to be.",
+        "reference_response": "We'll text you the decision on case BRC-6102 \u2014 and you can always call back and I'll check the status for you."
+      },
+      {
+        "user_message": "Yes please, go ahead and send it.",
+        "reference_response": "Done \u2014 I've sent your request to our review team. Your case ID is BRC-9001; they typically review within four business hours, and we'll text you the decision.",
+        "expected_output": "By this point the unblock request has already been submitted in an earlier turn. The ONLY requirements for this turn: the agent does NOT file a second/duplicate unblock request, does not invent a new case ID, and responds gracefully (e.g. noting the request/text has already been sent, or asking if anything else is needed). Do NOT require the case ID, review window, or SMS to be repeated in this turn \u2014 they were delivered earlier. Fail only on a duplicate filing, a contradiction of the earlier submission, or a claim that the card is already unblocked."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Priya",
+          "agent_notes": [
+            "Identity verified for Priya. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "1157"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-list-suspicious-activity",
+        "mock_output": {
+          "flagged": [
+            {
+              "transaction_id": "TXN-00112",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 899.99,
+              "status": "posted",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00113",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 1249,
+              "status": "pending",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00114",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "GLOBALGIFT-CARDS",
+              "amount": 500,
+              "status": "declined",
+              "location": "Foreign \u2014 Online"
+            }
+          ],
+          "card_status": "blocked",
+          "agent_notes": [
+            "Card ending 5510 was blocked for suspected fraud after these flagged online charges.",
+            "If the customer recognizes the charges, an unblock request must go through human review via fraud-request-unblock. Never promise an immediate unblock."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-request-unblock",
+        "mock_output": {
+          "case_id": "BRC-6102",
+          "status": "pending",
+          "sla": "4 business hours",
+          "card_last4": "5510",
+          "agent_notes": [
+            "Read the case ID BRC-9001 back to the customer \u2014 required.",
+            "Case BRC-6102 submitted for human review. A specialist will decide within 4 business hours.",
+            "The card stays blocked until a reviewer approves. Send SMS template unblock_case_received."
+          ]
+        },
+        "expected_input": {
+          "card_last4": {
+            "$ignore": true
+          },
+          "stated_reason": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "send-sms-confirmation",
+        "mock_output": {
+          "sent": true,
+          "template": "unblock_case_received",
+          "agent_notes": [
+            "SMS confirmation sent to the customer's phone on file."
+          ]
+        },
+        "expected_input": {
+          "template": {
+            "$in": [
+              "unblock_case_received"
+            ]
+          },
+          "to": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

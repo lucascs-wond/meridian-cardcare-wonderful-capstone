@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-payment-submit",
+  "description": "Meridian CardCare: submit a card payment from the bank account on file.",
+  "method": "POST",
+  "path_slug": "mcc-payment-submit",
+  "param_mapping": {}
+}

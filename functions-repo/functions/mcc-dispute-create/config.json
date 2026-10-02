@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-dispute-create",
+  "description": "Meridian CardCare data plane: file a transaction dispute with 60-day window enforcement and provisional-credit rules. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-dispute-create",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

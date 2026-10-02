@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Fraud / Dispute",
+  "category": "intent",
+  "description": "Caller disputed a charge (unauthorized, duplicate, goods not received, wrong amount, cancelled subscription) or asked about an existing dispute.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer contests a specific charge or asks about the status or outcome of a dispute. Do not apply for general transaction browsing."
+  },
+  "rules": []
+}

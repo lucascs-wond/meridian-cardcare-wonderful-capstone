@@ -1,0 +1,10 @@
+{
+  "name": "Case / Auto Approve",
+  "category": "outcome",
+  "description": "The task decided auto_approve \u2014 the eligibility rule was satisfied.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the task's case-decide call recorded outcome auto_approve. Do not apply for no-op replays where a prior decision already existed."
+  },
+  "rules": []
+}

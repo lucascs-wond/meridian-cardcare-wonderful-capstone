@@ -1,0 +1,10 @@
+{
+  "name": "Case / Close Resolved",
+  "category": "outcome",
+  "description": "The task closed an already-resolved case with no new credit.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the task's case-decide call recorded outcome close_resolved."
+  },
+  "rules": []
+}

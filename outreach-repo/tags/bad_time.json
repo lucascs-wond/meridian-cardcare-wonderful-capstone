@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Bad Time",
+  "category": "outcome",
+  "description": "The right person answered but could not talk now.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

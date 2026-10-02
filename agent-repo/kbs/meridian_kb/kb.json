@@ -1,0 +1,10 @@
+{
+  "description": "Meridian CardCare knowledge base: card products and benefits, applications and eligibility, fees and interest, payments and billing, rewards program, credit education, security/fraud/disputes, and service policies and contact information. Query it before answering any factual policy or product question.",
+  "notes": {
+    "agent_notes": [
+      "Query this knowledge base before answering questions about card products, fees, APR, rewards, billing, disputes, or service policies rather than answering from memory.",
+      "If the knowledge base returns nothing relevant, say you don't have that information instead of guessing."
+    ]
+  },
+  "trigger": "agent"
+}

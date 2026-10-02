@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-6 Already resolved — close without another credit",
+  "description": "The merchant already refunded the charge: close_resolved, no new credit. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-6. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-6 (duplicate_or_incorrect) disputes EVL-TX-6, whose transaction status is already 'refunded' and whose case carries resolution='merchant_refunded'. The task must decide close_resolved with NO new provisional credit and queue outreach confirming the merchant credit. Fail ONLY if: (a) the outcome is not close_resolved; (b) the summary promises a new/additional provisional credit; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

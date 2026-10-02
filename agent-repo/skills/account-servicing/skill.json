@@ -1,0 +1,37 @@
+{
+  "name": "account-servicing",
+  "display_name": "Account Servicing",
+  "description": "The verified caller's own account: balances, available credit, credit limit, payment due dates, transaction lookups, statement requests, and contact-info updates. Does NOT handle unrecognized or suspicious charges (fraud-and-disputes) or general product facts (card-knowledge). Identity verification required.",
+  "prompts": {
+    "skill": "prompts/skill.md"
+  },
+  "tools": {
+    "account-get-overview": {
+      "type": "programmable",
+      "config": {}
+    },
+    "account-search-transactions": {
+      "type": "programmable",
+      "config": {}
+    },
+    "account-request-statement": {
+      "type": "programmable",
+      "config": {}
+    },
+    "account-update-contact": {
+      "type": "programmable",
+      "config": {}
+    },
+    "account-make-payment": {
+      "type": "programmable",
+      "config": {}
+    }
+  },
+  "diacritics": [
+    "apr-spellout",
+    "cvv-spellout",
+    "fico-phonetic",
+    "rewards-plus-brand",
+    "autopay-hyphenation"
+  ]
+}

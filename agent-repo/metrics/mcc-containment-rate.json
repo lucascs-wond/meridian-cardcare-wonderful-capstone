@@ -1,0 +1,39 @@
+{
+  "name": "Containment Rate",
+  "description": "Share of eligible sessions that ended without any escalation tag (outcome-escalated-human, outcome-escalated-verification-lockout). Excludes abandoned calls and abusive/trolling calls. Target >= 70%, concern < 55%.",
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "not",
+          "tag_slug": "outcome-escalated-human"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "outcome-escalated-verification-lockout"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "outcome-abandoned"
+        }
+      ]
+    },
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "guardrail-abuse-warning"
+        }
+      ]
+    }
+  ]
+}

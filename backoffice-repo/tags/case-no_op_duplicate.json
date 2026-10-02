@@ -1,0 +1,10 @@
+{
+  "name": "Case / No-op Duplicate",
+  "category": "outcome",
+  "description": "Duplicate or stale delivery \u2014 nothing claimable; clean no-op.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when case-claim returned nothing_to_claim (or only already_decided no-ops occurred) and the task completed without recording a new decision."
+  },
+  "rules": []
+}

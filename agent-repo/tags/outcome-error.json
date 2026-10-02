@@ -1,0 +1,19 @@
+{
+  "name": "Outcome / Error",
+  "category": "outcome",
+  "description": "A tool or backing function failed during the call (data outage, review API down, unexpected error).",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": [
+    {
+      "operator": "or",
+      "conditions": [
+        {
+          "type": "tool_failed"
+        }
+      ]
+    }
+  ]
+}

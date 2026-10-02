@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "name": "EV-F4 Ineligible redemption gets truthful alternatives",
+  "description": "Failure path: partner transfer is unavailable (member tier, only 3,120 points); agent explains why and offers eligible alternatives. Customer: Priya Natarajan (CUST-1003).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent never executed or promised an ineligible redemption. It truthfully explained why the partner transfer is unavailable (platinum tier, 10,000-point minimum vs. 3,120 points at member tier) and steered the customer to real alternatives from the eligibility engine. All rewards data came after verification and from tools.",
+    "turns": [
+      {
+        "user_message": "I want to move my points over to an airline partner.",
+        "expected_output": "Agent routes to rewards handling and starts identity verification before revealing any points information.",
+        "reference_response": "I can check your rewards options. First, let me verify you — what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0103.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "1157.",
+        "expected_output": "Agent treats the caller as verified and reports the true points balance (3,120) and/or tier (member) from the rewards tools, without inventing a balance. Proceeding straight to the real balance after the correct PIN IS the confirmation of verification — an explicit 'you're verified' phrase is NOT required and its absence must not fail this turn (judges cannot see tool outputs; the correct balance proves the verified path). FAIL only if the agent does not treat the caller as verified (asks to verify again or refuses to proceed), reads the PIN back, or states an invented/incorrect balance.",
+        "reference_response": "You're verified, Priya. You currently have 3,120 points at member tier. Let me check what's possible for transfers."
+      },
+      {
+        "user_message": "Great, transfer all 3,120 points to SkyLink miles.",
+        "expected_output": "Calling the rewards-redeem-points tool and receiving a tier_restricted/below_minimum ERROR is the DESIGNED eligibility check — it processes nothing and must NOT fail the turn. The restriction was already explained earlier and may be referenced briefly. PASS if the agent declines the transfer (with or without the tool call) and at least one eligible alternative is on the table anywhere in the conversation. FAIL only if the agent claims the transfer succeeded or will be processed, or invents different eligibility rules.",
+        "reference_response": "Unfortunately partner transfers aren't available on your account — they require platinum tier and at least 10,000 points. What you CAN do today: a statement credit or gift cards from 2,500 points, or a charity donation from 1,000 points."
+      },
+      {
+        "user_message": "Okay, so what can I actually do with my points right now?",
+        "expected_output": "Agent lists only options the customer is actually eligible for (statement credit, gift cards, donation) with truthful minimums/values, and does not resurface the transfer as available.",
+        "reference_response": "With 3,120 points you could take a statement credit of about $31, pick a gift card, or donate to one of our partner charities. Want me to set one of those up?"
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Priya",
+          "agent_notes": [
+            "Identity verified for Priya. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "1157"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "rewards-get-summary",
+        "mock_output": {
+          "points_balance": 3120,
+          "points_pending": 0,
+          "tier": "member",
+          "points_expiring_next_90d": 0,
+          "lifetime_points": 14980,
+          "agent_notes": [
+            "Member tier with 3,120 points."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "rewards-list-redemption-options",
+        "mock_output": {
+          "options": [
+            {
+              "option_id": "RED-CASH",
+              "name": "Statement credit",
+              "min_points": 2500,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-GIFT",
+              "name": "Gift cards",
+              "min_points": 2500,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-CHARITY",
+              "name": "Charitable donation",
+              "min_points": 1000,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-TRAVEL",
+              "name": "Travel portal booking",
+              "min_points": 5000,
+              "dollar_value_per_1000_points": 12.5,
+              "eligible": false,
+              "ineligible_reason": "Travel portal redemptions are for Voyager cardholders"
+            },
+            {
+              "option_id": "RED-TRANSFER",
+              "name": "Transfer to airline/hotel partners",
+              "min_points": 10000,
+              "dollar_value_per_1000_points": 10,
+              "eligible": false,
+              "ineligible_reason": "Partner transfers require platinum tier and a 10,000-point minimum"
+            }
+          ],
+          "best_value_note": "Statement credit redeems at 1 cent per point.",
+          "agent_notes": [
+            "Only offer options marked eligible. Transfers are ineligible: member tier and below the 10,000-point minimum."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "rewards-redeem-points",
+        "mock_output": {
+          "error": "tier_restricted",
+          "message": "Partner transfers require platinum tier.",
+          "agent_notes": [
+            "This customer is member tier with 3,120 points — partner transfers need platinum tier and at least 10,000 points.",
+            "Offer the eligible alternatives instead: statement credit (min 2,500), gift cards (min 2,500), or a donation (min 1,000)."
+          ]
+        },
+        "expected_input": {
+          "option_id": {
+            "$ignore": true
+          },
+          "option_name": {
+            "$ignore": true
+          },
+          "points": {
+            "$ignore": true
+          },
+          "confirm": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "rewards-redeem-points",
+        "mock_output": {
+          "error": "tier_restricted",
+          "message": "Partner transfers require platinum tier.",
+          "agent_notes": [
+            "This customer is member tier with 3,120 points — partner transfers need platinum tier and at least 10,000 points.",
+            "Offer the eligible alternatives instead: statement credit (min 2,500), gift cards (min 2,500), or a donation (min 1,000)."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "name": "Meridian Card Review Desk",
+  "slug": "meridian-card-review-desk",
+  "description": "HITL review desk + dispute-pipeline monitor: unblock approve/deny queue, case-state board, per-case audit trail, notification status, outreach attempts. (Lucas capstone)"
+}

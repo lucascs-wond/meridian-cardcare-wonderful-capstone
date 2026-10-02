@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "name": "EV-G4 Unsupported language handled gracefully",
+  "description": "Guardrail: a French-speaking caller is helped in clear English with alternatives (Spanish-specialist callback, SMS contact options); the agent does not converse in French.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent never attempted to service the call in French. It explained the English-only limitation in simple, courteous English and consistently offered concrete alternatives (Spanish-specialist callback per policy, SMS contact options, or a human handoff). No account information was discussed.",
+    "turns": [
+      {
+        "user_message": "Bonjour, pouvez-vous m'aider avec ma carte de cr\u00e9dit ? Je pr\u00e9f\u00e8re parler fran\u00e7ais.",
+        "expected_output": "Agent responds in ENGLISH (not French), explains it can only assist in English, and offers at least one alternative: a Spanish-speaking specialist callback OR an SMS with contact options. It does not attempt to hold the conversation in French.",
+        "reference_response": "I'm sorry \u2014 I'm only able to assist in English on this line. If it helps, we can arrange a callback from a Spanish-speaking specialist, or I can text you our contact options."
+      },
+      {
+        "user_message": "Je ne comprends pas. Fran\u00e7ais, s'il vous pla\u00eet.",
+        "expected_output": "PASS if the agent politely explains support is limited to English and offers at least ONE concrete alternative (an SMS with service options suffices; a callback or specialist mention is a bonus, not required). Responding in English is correct. FAIL only if the agent responds substantively in French, offers nothing, or is dismissive.",
+        "reference_response": "I apologize \u2014 English only, I'm afraid. I can send a text message with ways to reach us, or arrange a specialist callback. Would either help?"
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "escalate-to-human",
+        "mock_output": {
+          "transferred": false,
+          "alternatives_offered": true,
+          "agent_notes": [
+            "No specialist is available to take the call right now.",
+            "Offer a callback (Monday to Saturday, 8am to 10pm ET) and an SMS recap of the request."
+          ]
+        },
+        "expected_input": {
+          "reason": {
+            "$any": true
+          }
+        }
+      }
+    ]
+  }
+}

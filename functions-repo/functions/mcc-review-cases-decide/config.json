@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-review-cases-decide",
+  "description": "Meridian Card Review Desk private API (dashboard): approve or deny a pending unblock case; approval reactivates the card (the only unblock write path). Requires an API key.",
+  "method": "POST",
+  "path_slug": "mcc-review-cases-decide",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

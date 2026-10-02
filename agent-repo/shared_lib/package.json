@@ -1,0 +1,19 @@
+{
+  "name": "@wonderful/shared-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "@wonderful/test": "^0.1.12",
+    "@wonderful/types": "^0.1.17",
+    "esbuild": "^0.28.0",
+    "vitest": "^4.1.4"
+  }
+}

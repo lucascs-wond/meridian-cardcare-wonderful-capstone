@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "name": "EV-R2 Unrecognized charge routes to fraud, not transaction browsing",
+  "description": "Routing: 'a charge I've never seen' goes to fraud-and-disputes (suspicious-activity review), not account-servicing browsing. Customer: Priya Natarajan (CUST-1003).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The unrecognized-charge intent was routed to fraud handling: the agent used the suspicious-activity review (not a generic transaction search narrative), explained the existing fraud block, and moved toward a dispute for the unauthorized charge. Verification happened before any account details. No skill switching was narrated.",
+    "turns": [
+      {
+        "user_message": "There's a charge on my card I've never seen before.",
+        "expected_output": "Agent treats this as a potential fraud matter (silently switches to the fraud-and-disputes skill rather than general transaction browsing) and starts identity verification. It does not narrate the skill switch.",
+        "reference_response": "I take that seriously \u2014 let's look into it right away. First, what's the phone number on your account so I can verify you?"
+      },
+      {
+        "user_message": "555-010-0103.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "1157.",
+        "expected_output": "Agent calls fraud-list-suspicious-activity and reviews the flagged charges with the customer (LUXEWATCH-INTL charges and/or the blocked card ending 5510). Simply reading a generic transaction list without the fraud context is a failure.",
+        "reference_response": "You're verified, Priya. I see some flagged activity: two online charges from LUXEWATCH-INTL, $899.99 and $1,249, and a declined $500 gift-card purchase \u2014 your card ending 5510 was blocked for suspected fraud. Do any of those look familiar?"
+      },
+      {
+        "user_message": "No \u2014 I've never bought anything from a watch site!",
+        "expected_output": "The already-blocked reassurance may have been given in an earlier turn \u2014 do not require it again here. PASS if the agent moves to dispute the denied charges: offering to file, asking to confirm filing, or filing via fraud-file-dispute all pass (the unauthorized_transaction reason may live in the tool call rather than being spoken). FAIL only if the agent: (a) calls fraud-block-card again for the already-blocked card, (b) refuses or forgets the dispute, or (c) tells the customer the charges must stand.",
+        "reference_response": "Okay \u2014 the good news is your card is already blocked, so nothing more can go through. I can file a dispute for the posted $899.99 charge so you're not on the hook while we investigate. Want me to do that?"
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Priya",
+          "agent_notes": [
+            "Identity verified for Priya. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "1157"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-list-suspicious-activity",
+        "mock_output": {
+          "flagged": [
+            {
+              "transaction_id": "TXN-00112",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 899.99,
+              "status": "posted",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00113",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "LUXEWATCH-INTL",
+              "amount": 1249,
+              "status": "pending",
+              "location": "Foreign \u2014 Online"
+            },
+            {
+              "transaction_id": "TXN-00114",
+              "date": "{{ now - 6d | format=\"date\" }}",
+              "merchant": "GLOBALGIFT-CARDS",
+              "amount": 500,
+              "status": "declined",
+              "location": "Foreign \u2014 Online"
+            }
+          ],
+          "card_status": "blocked",
+          "agent_notes": [
+            "Card ending 5510 was blocked for suspected fraud after these flagged online charges.",
+            "If the customer recognizes the charges, an unblock request must go through human review via fraud-request-unblock. Never promise an immediate unblock."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-file-dispute",
+        "mock_output": {
+          "dispute_id": "DSP-4103",
+          "provisional_credit": true,
+          "expected_resolution_date": "{{ now + 10d | format=\"date\" }}",
+          "agent_notes": [
+            "Dispute DSP-4103 filed for the unauthorized charge. A provisional credit posts within 2 business days.",
+            "Give the customer the expected resolution date."
+          ]
+        },
+        "expected_input": {
+          "merchant": {
+            "$ignore": true
+          },
+          "amount": {
+            "$ignore": true
+          },
+          "date": {
+            "$ignore": true
+          },
+          "transaction_id": {
+            "$ignore": true
+          },
+          "reason": {
+            "$in": [
+              "unauthorized_transaction"
+            ]
+          },
+          "description": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      },
+      {
+        "tool_name": "fraud-block-card",
+        "mock_output": {
+          "status": "already_blocked",
+          "card_last4": "5510",
+          "agent_notes": [
+            "Card ending 5510 is ALREADY blocked for suspected fraud \u2014 no new block was placed and none is needed.",
+            "Reassure the caller the card is already secured, then continue: offer to file a dispute for any charge the caller denies."
+          ]
+        },
+        "expected_input": {
+          "card_last4": {
+            "$ignore": true
+          },
+          "reason": {
+            "$ignore": true
+          },
+          "customer_id": {
+            "$ignore": true
+          }
+        }
+      }
+    ]
+  }
+}

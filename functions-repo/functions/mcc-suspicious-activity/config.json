@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-suspicious-activity",
+  "description": "Meridian CardCare data plane: fraud-flagged, declined, and pending foreign transactions for an account, plus card status. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-suspicious-activity",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

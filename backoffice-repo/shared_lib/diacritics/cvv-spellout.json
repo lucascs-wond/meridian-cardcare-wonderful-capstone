@@ -1,0 +1,12 @@
+{
+  "display_name": "CVV spell-out",
+  "description": "Security guidance ('never share your CVV') must be letter-by-letter.",
+  "pattern_options": [
+    {
+      "regexables": [
+        { "type": "literal", "value": "CVV" }
+      ]
+    }
+  ],
+  "replacement": "C-V-V"
+}

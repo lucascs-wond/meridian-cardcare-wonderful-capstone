@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-statement-request",
+  "description": "Meridian CardCare data plane: queue a statement copy for email delivery (latest or a specific month). Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-statement-request",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

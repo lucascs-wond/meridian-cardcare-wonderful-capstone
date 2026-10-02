@@ -1,0 +1,12 @@
+{
+  "display_name": "Autopay hyphenation",
+  "description": "Prevents the mushed single-word reading; hyphenation forces the natural two-beat 'auto-pay'.",
+  "pattern_options": [
+    {
+      "regexables": [
+        { "type": "literal", "value": "autopay" }
+      ]
+    }
+  ],
+  "replacement": "auto-pay"
+}

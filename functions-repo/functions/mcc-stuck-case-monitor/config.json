@@ -1,0 +1,12 @@
+{
+  "kind": "cron",
+  "name": "mcc-stuck-case-monitor",
+  "description": "Meridian dispute pipeline: hourly stuck-case detector — flags cases parked too long or with failed notifications, emails the operator, writes audit events.",
+  "cron_schedules": [
+    {
+      "cron_expression": "0 */1 * * *",
+      "timezone": "UTC",
+      "enabled": true
+    }
+  ]
+}

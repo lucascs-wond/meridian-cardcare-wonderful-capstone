@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Rewards / Balance",
+  "category": "intent",
+  "description": "Caller asked about their own points balance, tier status, or expiring points.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks how many points they have, their tier, pending points, or points about to expire. Do not apply for how the program works in general."
+  },
+  "rules": []
+}

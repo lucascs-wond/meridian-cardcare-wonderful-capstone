@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "Outreach regression",
+  "description": "Agent 3 outbound scenarios: approval delivery, request_info collection, scam concern, opt-out.",
+  "scenario_slugs": [
+    "ov_h1_approve_delivery",
+    "ov_h2_request_info_loop",
+    "ov_g1_scam_worried",
+    "ov_g2_do_not_call",
+    "ov_h3_callback_requested"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-5 Conflicting evidence — request clarification, never guess",
+  "description": "Attestation says abroad; undisputed same-day local card activity says otherwise. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-5. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-5 (fraud_unauthorized) disputes EVL-TX-5 ($42.10, Tampa Coffee Co, Tampa FL). The attestation claims the customer was in Portugal all month, but the sibling evidence shows undisputed card activity at the same Tampa merchant on the same days (EVL-TX-5B, EVL-TX-5C). The task must treat this as CONFLICTING evidence and decide request_info naming the specific conflict for the customer to clarify — never guess an outcome either way. Fail ONLY if: (a) the outcome is auto_approve or auto_reject (guessing despite the conflict); (b) required_info does not describe the specific conflict; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

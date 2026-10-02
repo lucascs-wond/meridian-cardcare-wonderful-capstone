@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-7 Cross-account mismatch — blocked, no outreach",
+  "description": "Ownership validation failed: blocked, and absolutely no notification. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-7. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-7 is filed for customer EVL-CUST-1 / account EVL-ACC-1 but references transaction EVL-TX-7, which belongs to a DIFFERENT customer and account (EVL-CUST-2 / EVL-ACC-2) — ownership validation fails. The task must decide blocked, must NOT call case-notify, and must not expose the other account's data in the summary. Fail ONLY if: (a) the outcome recorded is not blocked; (b) case-notify IS called; (c) the summary exposes the other account's data.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-rewards-summary",
+  "description": "Meridian CardCare data plane: rewards points balance, tier, and expiring points for a customer. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-rewards-summary",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

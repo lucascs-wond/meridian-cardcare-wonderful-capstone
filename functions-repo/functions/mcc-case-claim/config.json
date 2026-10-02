@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-case-claim",
+  "description": "Meridian dispute pipeline: task-\u003ecase binding — claims the oldest received/info_received case; duplicate deliveries no-op.",
+  "method": "POST",
+  "path_slug": "mcc-case-claim",
+  "param_mapping": {}
+}

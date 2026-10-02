@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "name": "EV-H1 Verify identity and read balance",
+  "description": "Happy path: caller verifies with phone + PIN, then hears their balance and payment details. Customer: Ava Thompson (CUST-1001).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent verified the customer's identity (phone and PIN) BEFORE disclosing any account information, answered only with figures that came from tool calls (verify-identity, account-get-overview), never read the PIN back, and kept turns short and natural for a voice call.",
+    "turns": [
+      {
+        "user_message": "Hi, I want to check my card balance.",
+        "expected_output": "Agent does not state any balance or account details and asks to verify the customer's identity (starting with the phone number) first.",
+        "reference_response": "I can help with that. First I need to verify your identity \u2014 could I have the phone number on your account?"
+      },
+      {
+        "user_message": "Sure, it's 555-010-0101.",
+        "expected_output": "Agent asks for the 4-digit verification PIN and still does not reveal any account information.",
+        "reference_response": "Thanks. And could you give me your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "My PIN is 4821.",
+        "expected_output": "Agent calls the verify-identity tool with the PIN and then EITHER explicitly confirms verification OR immediately proceeds to deliver the account data (delivering the balance after a successful verify itself confirms verification). It states the current balance of $1,843.27 (from account-get-overview). Agent never repeats the PIN back aloud.",
+        "reference_response": "You're verified, Ava. Your current balance is $1,843.27 and you have $10,156.73 in available credit."
+      },
+      {
+        "user_message": "Great. And what's my minimum payment, and when is it due?",
+        "expected_output": "Agent states the minimum payment of $47 and a specific payment due date. The due date must be CONSISTENT with the one the agent stated in its previous reply (the figures come from the account-get-overview tool call earlier in the conversation, whose raw output may not be visible to you \u2014 consistency between the two replies is the check, NOT tool-output provenance). Fail only if the figures contradict each other or the $47 minimum is wrong.",
+        "reference_response": "Your minimum payment is $47, and it's due in about three weeks \u2014 I can text you the exact date if you like."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "mock_output": {
+          "account_id": "ACC-2001",
+          "product_name": "Meridian Rewards+",
+          "current_balance": 1843.27,
+          "available_credit": 10156.73,
+          "credit_limit": 12000,
+          "statement_balance": 1560.44,
+          "min_payment_due": 47,
+          "payment_due_date": "{{ now + 19d | format=\"date\" }}",
+          "autopay_enrolled": true,
+          "autopay_type": "statement_balance",
+          "status": "current",
+          "agent_notes": [
+            "Speak amounts naturally (for voice). Autopay is enrolled for the statement balance."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

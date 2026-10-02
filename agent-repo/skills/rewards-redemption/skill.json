@@ -1,0 +1,29 @@
+{
+  "name": "rewards-redemption",
+  "display_name": "Rewards Redemption",
+  "description": "The verified caller's own rewards: points balance, tier status, expiring points, the redemption catalog with eligibility, and executing redemptions with a two-phase quote-then-confirm flow. Does NOT handle rewards program rules or education (card-knowledge). Identity verification required.",
+  "prompts": {
+    "skill": "prompts/skill.md"
+  },
+  "tools": {
+    "rewards-get-summary": {
+      "type": "programmable",
+      "config": {}
+    },
+    "rewards-list-redemption-options": {
+      "type": "programmable",
+      "config": {}
+    },
+    "rewards-redeem-points": {
+      "type": "programmable",
+      "config": {}
+    }
+  },
+  "diacritics": [
+    "apr-spellout",
+    "cvv-spellout",
+    "fico-phonetic",
+    "rewards-plus-brand",
+    "autopay-hyphenation"
+  ]
+}

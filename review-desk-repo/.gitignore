@@ -1,0 +1,22 @@
+# No trailing slash on purpose: a sandbox clone links app/node_modules to the
+# image's pre-installed copy, and "node_modules/" matches directories only — so a
+# trailing slash lets git commit the symlink, which then breaks the server build.
+node_modules
+
+# The app's build output. The deploy uploads the packaged bundle as an app
+# version, so nothing under app/dist belongs in git.
+app/dist/
+app/runner-dist/
+
+# Deliberately NOT ignored, unlike the agent and function repo templates:
+#   pnpm-lock.yaml  the sandbox build runs `pnpm install --frozen-lockfile`
+#   .npmrc          points @wonderful at the registry; rewritten per-env at build
+#   dist/           repo-root dist/functions/<slug>/index.js holds the built
+#                   function bundles, which the publish path commits
+
+*.log
+.DS_Store
+.vscode/
+.wonderful/*
+!.wonderful/actions/
+!.wonderful/actions/**

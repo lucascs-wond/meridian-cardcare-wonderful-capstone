@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-case-info-submit",
+  "description": "Meridian dispute pipeline: records customer-supplied info for an info_requested case and re-fires the backoffice webhook (Agent 3 -> Agent 2 loop).",
+  "method": "POST",
+  "path_slug": "mcc-case-info-submit",
+  "param_mapping": {}
+}

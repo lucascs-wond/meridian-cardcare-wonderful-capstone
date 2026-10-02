@@ -1,0 +1,333 @@
+{
+  "profile": {
+    "version": "1.0",
+    "name": "mcc-outreach",
+    "display_name": "Meridian Dispute Outreach",
+    "description": "Agent 3 skeleton \u2014 outbound dispute-outcome calls via Campaign. Trust-first opening, per-outcome scripts, record_call_disposition. Implementation follows the Agent 2 stage.",
+    "mode": "conversational",
+    "locale": "en-US",
+    "timezone": "UTC",
+    "gender": "female"
+  },
+  "voice": {
+    "orchestrator_type": "traditional",
+    "tts": {
+      "priority": [
+        "lara",
+        "lily"
+      ],
+      "failure_threshold": 2,
+      "synthesis_timeout_seconds": 3,
+      "automatic_speed": false,
+      "slow_reading": false,
+      "emotional": false,
+      "telephony_shaping": {
+        "intensity": "low",
+        "ambient_profile": "office",
+        "environment_events": "off"
+      }
+    },
+    "stt": {
+      "providers": {
+        "soniox": {
+          "provider": "soniox",
+          "model": "stt-rt-v4",
+          "language": "en-US",
+          "smart_format": false,
+          "punctuate": false,
+          "endpointing": 0,
+          "keywords": [],
+          "interim_results": false,
+          "filler_words": false,
+          "profanity_filter": false,
+          "diarize": true
+        }
+      },
+      "priority": {
+        "default": [
+          "soniox"
+        ]
+      },
+      "failure_threshold": 3,
+      "transcription_corrector": false,
+      "translation": {
+        "enabled": false,
+        "language": ""
+      }
+    },
+    "turn_taking": {
+      "end_of_turn": {
+        "enabled": true,
+        "version": "smart-turn",
+        "detection_model": "v3.2-multilingual",
+        "timeout_ms": 500,
+        "settings": {},
+        "playback_pause": {
+          "enabled": true,
+          "max_duration_ms": 1500,
+          "since_final_window_ms": 1500
+        }
+      },
+      "interrupts": {
+        "min_words_for_substantial": 3,
+        "min_heard_percentage_for_substantial": 0.5,
+        "restate_unfinished_content": true,
+        "semantic_backchannel_classification": false
+      },
+      "turn_control": {
+        "debounce_window_ms": 0
+      },
+      "response_gate": {
+        "enabled": false,
+        "initial_state": "closed"
+      },
+      "allow_skip_turn": true,
+      "allow_async_skip_turn": false,
+      "denoiser": "standard",
+      "fluent_chunking": true
+    },
+    "language": {
+      "main": "en-US",
+      "enabled": [],
+      "switch_mode": "auto_detect",
+      "auto_detect": {
+        "enabled": false,
+        "min_chars": 0,
+        "min_confidence": 0,
+        "stable_count": 1,
+        "cooldown_ms": 0,
+        "llm_cooldown_ms": 0
+      },
+      "auto_translate_tool_notes": false,
+      "multilingual_enabled": false,
+      "voice_overrides": {},
+      "transcriber_overrides": {},
+      "realtime_voice_overrides": {},
+      "initial_messages_by_locale": {}
+    }
+  },
+  "behavior": {
+    "routing": {
+      "mode": "automated",
+      "is_multi_skill": false
+    },
+    "channels": {
+      "voice": {
+        "initial_message": {
+          "enabled": false,
+          "text": "",
+          "translations": {}
+        },
+        "timeouts": {
+          "conversation_time_limit": {
+            "enabled": true,
+            "duration_seconds": 7200,
+            "display_unit": "minutes",
+            "announcement": "",
+            "announcement_enabled": true
+          },
+          "user_inactivity": {
+            "check_in": {
+              "enabled": true,
+              "duration_seconds": 45,
+              "display_unit": "seconds",
+              "message": ""
+            },
+            "disconnect_warn": {
+              "enabled": true,
+              "duration_seconds": 75,
+              "display_unit": "seconds",
+              "message": ""
+            },
+            "end_conversation": {
+              "enabled": true,
+              "duration_seconds": 80,
+              "display_unit": "seconds",
+              "message": ""
+            }
+          }
+        },
+        "idle": {
+          "check_message": "",
+          "goodbye_message": ""
+        },
+        "telephony": {
+          "forwarding": {},
+          "phone_filtering": {
+            "enabled": false,
+            "block_privacy_callers": false
+          },
+          "sip_headers": {}
+        }
+      },
+      "chat": {
+        "initial_message": {
+          "enabled": false,
+          "text": "",
+          "translations": {}
+        },
+        "timeouts": {
+          "conversation_time_limit": {
+            "enabled": true,
+            "duration_seconds": 5400,
+            "display_unit": "minutes",
+            "announcement": "",
+            "announcement_enabled": true
+          },
+          "user_inactivity": {
+            "check_in": {
+              "enabled": false,
+              "duration_seconds": 0,
+              "display_unit": "minutes",
+              "message": ""
+            },
+            "disconnect_warn": {
+              "enabled": false,
+              "duration_seconds": 0,
+              "display_unit": "minutes",
+              "message": ""
+            },
+            "end_conversation": {
+              "enabled": false,
+              "duration_seconds": 0,
+              "display_unit": "minutes",
+              "message": ""
+            }
+          }
+        },
+        "connections": {
+          "whatsapp": {
+            "enabled": false
+          },
+          "slack": {
+            "enabled": false
+          },
+          "web_widget": {
+            "enabled": false
+          }
+        }
+      },
+      "email": {
+        "initial_message": {
+          "enabled": false,
+          "text": "",
+          "translations": {}
+        },
+        "connections": {
+          "gmail": {
+            "enabled": false
+          }
+        }
+      }
+    },
+    "attachments": {
+      "enabled": false,
+      "upload_to_s3": true,
+      "max_per_conversation": 0,
+      "max_file_size_mb": 0,
+      "max_extracted_text_chars": 0,
+      "ocr_provider": "gemini",
+      "ocr_options": {
+        "model": "gemini-3.5-flash-lite",
+        "temperature": 0.1
+      }
+    },
+    "guardrails": {
+      "pii": {
+        "policies": [],
+        "beep_padding_start_ms": 0,
+        "beep_padding_end_ms": 0,
+        "batch_verifier_enabled": false,
+        "batch_verifier_max_retries": 0,
+        "batch_verifier_continue_on_error": false,
+        "pii_masking_thinking_budget": 0
+      },
+      "governance_enabled": true,
+      "automated_issues_enabled": true
+    },
+    "privacy": {
+      "call_recording": {
+        "disabled": false,
+        "require_consent": false,
+        "upload_transcript": false
+      },
+      "data_retention": {
+        "enabled": false
+      }
+    },
+    "internal": {
+      "compact_context": true,
+      "use_dynamic_announcements": false,
+      "prompts": {
+        "dynamic_announcement": {}
+      }
+    },
+    "capabilities": {
+      "disable_json_diacritics": false,
+      "disable_hours_and_numbers_diacritics": false
+    },
+    "tool_overrides": {},
+    "global_tools": {}
+  },
+  "ai": {
+    "llm": {
+      "voice": {
+        "providers": {
+          "openai": {
+            "model": "gpt-realtime-1.5",
+            "temperature": 0,
+            "top_p": 0
+          },
+          "wonderful": {
+            "model": "wonderful/gemma-4-31b-it",
+            "temperature": 0,
+            "top_p": 0
+          },
+          "wonderful-eu": {
+            "model": "wonderful-systems-ltd/gemma-4-31b-it",
+            "temperature": 0,
+            "top_p": 0
+          }
+        },
+        "priority": [
+          "wonderful",
+          "wonderful-eu"
+        ],
+        "failure_threshold": 3
+      },
+      "chat": {
+        "providers": {
+          "wonderful": {
+            "model": "wonderful/gemma-4-31b-it",
+            "temperature": 0,
+            "top_p": 0
+          },
+          "wonderful-eu": {
+            "model": "wonderful-systems-ltd/gemma-4-31b-it",
+            "temperature": 0,
+            "top_p": 0
+          }
+        },
+        "priority": [
+          "wonderful",
+          "wonderful-eu"
+        ],
+        "failure_threshold": 3,
+        "enabled": false
+      }
+    }
+  },
+  "prompts": {
+    "agent": "base.md",
+    "summary": "summary.md",
+    "tags": "tags.md",
+    "skip_turn": {},
+    "read_directive": "internal_prompts/read_directive.md"
+  },
+  "a2a": {
+    "server": {
+      "internal_enabled": true,
+      "enabled": false
+    }
+  }
+}

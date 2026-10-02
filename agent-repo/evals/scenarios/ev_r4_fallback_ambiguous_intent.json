@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "name": "EV-R4 Ambiguous intent gets one clarifying question",
+  "description": "Routing fallback: a vague opener gets exactly one clarifying question, then routes on the answer. Customer: Priya Natarajan (CUST-1003).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent resolved the ambiguous opener with a single clarifying question, routed correctly to fraud handling once the customer said 'a charge I don't recognize', and started verification before any account discussion. It never guessed between skills and never narrated routing.",
+    "turns": [
+      {
+        "user_message": "It's about my card\u2026 something's off.",
+        "expected_output": "Agent asks ONE clarifying question to disambiguate (e.g. unrecognized charge vs. something else) instead of guessing an intent, launching verification for an unknown request, or listing a long menu.",
+        "reference_response": "I can help. Is it a charge you don't recognize, or something else \u2014 like a payment or the card itself?"
+      },
+      {
+        "user_message": "Yeah \u2014 there's a charge I don't recognize.",
+        "expected_output": "Agent routes to fraud handling (fraud-and-disputes) based on the answer and begins identity verification. The routing is silent \u2014 no mention of skills or transferring.",
+        "reference_response": "Got it \u2014 let's look into that right away. First I need to verify you: what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0103.",
+        "expected_output": "Agent asks for the verification PIN and has still not revealed any account information.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

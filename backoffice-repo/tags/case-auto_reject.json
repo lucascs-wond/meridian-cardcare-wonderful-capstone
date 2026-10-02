@@ -1,0 +1,10 @@
+{
+  "name": "Case / Auto Reject",
+  "category": "outcome",
+  "description": "The task decided auto_reject \u2014 present evidence disproved eligibility.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the task's case-decide call recorded outcome auto_reject. Never applies when evidence was merely missing."
+  },
+  "rules": []
+}

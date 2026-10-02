@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Account / Transactions",
+  "category": "intent",
+  "description": "Caller asked to review, search, or explain specific transactions on their account, or requested a statement.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks what they spent, looks up purchases at a merchant, reviews recent activity, or requests a statement copy. Do not apply when the charge is described as unrecognized, fraudulent, or disputed."
+  },
+  "rules": []
+}

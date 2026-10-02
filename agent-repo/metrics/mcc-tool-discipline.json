@@ -1,0 +1,26 @@
+{
+  "name": "Tool Discipline Rate",
+  "description": "Share of eligible sessions with no failed tool call, via the rule-based outcome-error tag (fires on any tool_failed). Abandoned calls are excluded. Concern: outcome-error rate > 10%.",
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "not",
+          "tag_slug": "outcome-error"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "outcome-abandoned"
+        }
+      ]
+    }
+  ]
+}

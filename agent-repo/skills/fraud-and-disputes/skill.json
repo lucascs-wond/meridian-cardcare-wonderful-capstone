@@ -1,0 +1,41 @@
+{
+  "name": "fraud-and-disputes",
+  "display_name": "Fraud & Disputes",
+  "description": "Card security for the verified caller: lost or stolen cards, suspicious or unrecognized charges, card blocks, unblock requests (human-in-the-loop review \u2014 never automatic), dispute filing and status, and fraud alerts. Does NOT handle general transaction browsing (account-servicing). Identity verification required.",
+  "prompts": {
+    "skill": "prompts/skill.md"
+  },
+  "tools": {
+    "fraud-block-card": {
+      "type": "programmable",
+      "config": {}
+    },
+    "fraud-list-suspicious-activity": {
+      "type": "programmable",
+      "config": {}
+    },
+    "fraud-request-unblock": {
+      "type": "programmable",
+      "config": {}
+    },
+    "fraud-check-unblock-status": {
+      "type": "programmable",
+      "config": {}
+    },
+    "fraud-file-dispute": {
+      "type": "programmable",
+      "config": {}
+    },
+    "fraud-dispute-status": {
+      "type": "programmable",
+      "config": {}
+    }
+  },
+  "diacritics": [
+    "apr-spellout",
+    "cvv-spellout",
+    "fico-phonetic",
+    "rewards-plus-brand",
+    "autopay-hyphenation"
+  ]
+}

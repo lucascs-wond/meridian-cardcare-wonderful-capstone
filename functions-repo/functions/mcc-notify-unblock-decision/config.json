@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-notify-unblock-decision",
+  "description": "Meridian CardCare: SMS the customer the reviewer unblock decision. Called by the MCC Unblock Case Flow procedure.",
+  "method": "POST",
+  "path_slug": "mcc-notify-unblock-decision",
+  "param_mapping": {}
+}

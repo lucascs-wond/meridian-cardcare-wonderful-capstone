@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "name": "EV-F6 Payment — overpayment declined",
+  "description": "A payment above the current balance is declined with the full-balance alternative offered; nothing is submitted.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "turns": [
+      {
+        "user_message": "Hello, I want to make a five thousand dollar payment on my card.",
+        "expected_output": "Brief latency filler lines like 'One moment' are platform announcements, NOT account-data disclosures — ignore them. Agent starts identity verification. Fail ONLY if account data is disclosed before verification or a payment is claimed to be made."
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN."
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Brief latency filler lines like 'One moment' are platform announcements, NOT account-data disclosures — ignore them. Agent confirms verification and proceeds with the payment request (asking to confirm the amount, or checking it — both fine). Fail ONLY if it re-requests phone/PIN or reads the PIN back."
+      },
+      {
+        "user_message": "Yes, five thousand dollars.",
+        "expected_output": "Agent explains the $5,000 payment exceeds the current balance of $1,843.27 and that overpayments are not accepted, and offers to pay the full balance instead. A quote-phase tool call is fine. Fail ONLY if in THIS turn: (a) the agent submits or claims to submit the $5,000 payment; (b) it invents a different balance; (c) it simply refuses with no alternative offered.",
+        "reference_response": "That amount is more than your current balance of one thousand eight hundred forty-three dollars and twenty-seven cents — we can't accept overpayments. Would you like to pay the full balance instead?"
+      },
+      {
+        "user_message": "Oh I see — no, that's all for now, thanks.",
+        "expected_output": "Agent wraps up politely without submitting any payment. Fail ONLY if a payment is submitted or claimed."
+      }
+    ],
+    "conversation_prompt": "Identity was verified first. No payment was ever executed (no confirmed-true submission), the overpayment was declined citing the $1,843.27 balance from tool data, and the full-balance alternative was offered.",
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      },
+      {
+        "tool_name": "account-make-payment",
+        "expected_input": {},
+        "mock_output": {
+          "error": "amount_exceeds_balance",
+          "current_balance": 1843.27,
+          "agent_notes": [
+            "$5000.00 is more than the current balance of $1843.27 — we don't accept overpayments. Offer the full balance instead."
+          ]
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "expected_input": {},
+        "mock_output": {
+          "current_balance": 1843.27,
+          "available_credit": 10156.73,
+          "credit_limit": 12000,
+          "statement_balance": 1520.4,
+          "min_payment_due": 64.0,
+          "payment_due_date": "{{ now + 12d | format=\"date\" }}",
+          "autopay_enrolled": false,
+          "agent_notes": [
+            "Current balance $1843.27, minimum due $64.00 by the due date. Lead with the figure the customer asked for."
+          ]
+        }
+      }
+    ]
+  }
+}

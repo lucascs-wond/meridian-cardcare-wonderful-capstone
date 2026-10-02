@@ -1,0 +1,13 @@
+{
+  "name": "lucas-meridian-cardcare",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {"@wonderful/shared-lib":"file:./shared_lib"},
+  "devDependencies": {
+    "@wonderful/test": "^0.1.12",
+    "@wonderful/types": "^0.1.17",
+    "esbuild": "^0.28.0",
+    "vitest": "^4.1.4"
+  }
+}

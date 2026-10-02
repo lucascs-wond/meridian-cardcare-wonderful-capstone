@@ -1,0 +1,25 @@
+{
+  "name": "Outcome / Escalated / Human",
+  "category": "outcome",
+  "description": "The call was transferred (or a transfer was attempted) to a human specialist.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": [
+    {
+      "operator": "or",
+      "conditions": [
+        {
+          "type": "call_forwarded"
+        },
+        {
+          "type": "tool_called",
+          "parameters": {
+            "tool_id": "escalate-to-human"
+          }
+        }
+      ]
+    }
+  ]
+}

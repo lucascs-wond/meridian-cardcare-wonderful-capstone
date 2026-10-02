@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "MCC Customers Lookup",
+  "description": "Meridian CardCare data plane: look up a customer by phone or customer_id with account and card summaries. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-customers-lookup",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

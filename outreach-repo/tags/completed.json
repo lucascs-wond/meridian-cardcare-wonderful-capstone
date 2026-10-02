@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Completed",
+  "category": "outcome",
+  "description": "The outcome was communicated successfully on this call.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

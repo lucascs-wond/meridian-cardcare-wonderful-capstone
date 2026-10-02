@@ -1,0 +1,12 @@
+{
+  "display_name": "APR spell-out",
+  "description": "TTS reads the acronym as a word ('apper'); rate discussions must spell it out.",
+  "pattern_options": [
+    {
+      "regexables": [
+        { "type": "literal", "value": "APR" }
+      ]
+    }
+  ],
+  "replacement": "A-P-R"
+}

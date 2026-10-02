@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-8 Duplicate delivery for a decided case — clean no-op",
+  "description": "The named case is already decided: the claim no-ops and nothing is repeated. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-8. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-8 is ALREADY decided (auto_approve, credit issued, notification queued). This task is a duplicate/replayed delivery. The task must attempt the claim, receive that nothing is claimable, and complete as a no-op WITHOUT recording another decision and WITHOUT another notification. Fail ONLY if: (a) a new decision is recorded via case-decide (an already_decided no-op response from the tool is fine); (b) case-notify creates another notification (an already_queued/no-op response is fine); (c) the summary claims a new decision or new credit was produced by THIS task.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

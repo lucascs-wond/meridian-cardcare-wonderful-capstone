@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "name": "EV-H7 Payment — two-phase from bank on file",
+  "description": "Minimum-due payment: quote read-back, explicit confirmation, execution with confirmation number. Completed in-conversation.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "turns": [
+      {
+        "user_message": "Hi, I'd like to make a payment on my card.",
+        "expected_output": "Brief latency filler lines like 'One moment' are platform announcements, NOT account-data disclosures — ignore them. Agent offers to help and starts identity verification (asking for the phone number on the account). Fail ONLY if account data is disclosed before verification or the agent claims a payment was made.",
+        "reference_response": "I can help you make a payment. First, for security, could you tell me the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN. Fail ONLY if it discloses account data or skips verification."
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Brief latency filler lines like 'One moment' are platform announcements, NOT account-data disclosures — ignore them. Agent confirms verification (moving straight on counts) and asks how much to pay — minimum due, statement balance, full balance, or another amount. Fail ONLY if: (a) it re-requests phone/PIN; (b) reads the PIN back; (c) states a payment was made."
+      },
+      {
+        "user_message": "Just the minimum due, please.",
+        "expected_output": "Agent quotes the payment for read-back: $64.00 from the bank account on file, and asks for confirmation. A tool call WITHOUT confirmed is the designed QUOTE phase — not an execution; do not fail for it. Fail ONLY if in THIS turn: (a) the agent states the payment is already completed; (b) it quotes an amount other than $64.00; (c) it executes with confirmed true before the customer says yes.",
+        "reference_response": "That's a payment of sixty-four dollars from your bank account on file, posting within one business day. Shall I go ahead?"
+      },
+      {
+        "user_message": "Yes, go ahead.",
+        "expected_output": "Agent submits the payment (the tool call WITH confirmed true) and reads back the confirmation number MC-90112233. Mentioning the posting timeline or the new balance is welcome but NOT required. Fail ONLY if in THIS turn: (a) no confirmation number is given; (b) the amount changes from $64.00; (c) the agent re-quotes without executing. Latency fillers like 'I'll get that processed' right before the tool result are normal — do not fail for them.",
+        "reference_response": "Your payment of sixty-four dollars is confirmed — confirmation number M-C-9-0-1-1-2-2-3-3. It will post by tomorrow."
+      }
+    ],
+    "conversation_prompt": "Identity was verified before any account action. The payment followed the strict two-phase contract: a quote of exactly $64.00 was read back first, execution happened exactly once with confirmed true only after the customer's explicit yes, and the confirmation number came from tool data. No overpayment, no invented figures.",
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      },
+      {
+        "tool_name": "account-make-payment",
+        "expected_input": {
+          "confirmed": {
+            "$in": [
+              true
+            ]
+          },
+          "amount": {
+            "$any": true
+          }
+        },
+        "mock_output": {
+          "payment_id": "PAY-90112233",
+          "confirmation_number": "MC-90112233",
+          "amount": 64.0,
+          "bank_last4": "4553",
+          "post_date": "{{ now + 1d | format=\"date\" }}",
+          "new_balance": 1779.27,
+          "agent_notes": [
+            "Payment of $64.00 from the bank account ending 4553 is confirmed — read back the confirmation number MC-90112233.",
+            "It posts within 1 business day; the new balance is $1779.27."
+          ]
+        }
+      },
+      {
+        "tool_name": "account-make-payment",
+        "expected_input": {},
+        "mock_output": {
+          "quote": true,
+          "amount": 64.0,
+          "agent_notes": [
+            "QUOTE ONLY — nothing was paid yet. Read back: a payment of $64.00 from the bank account on file, posting within 1 business day.",
+            "Only after the customer explicitly says yes, call again with confirmed: true and this exact amount."
+          ]
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "expected_input": {},
+        "mock_output": {
+          "current_balance": 1843.27,
+          "available_credit": 10156.73,
+          "credit_limit": 12000,
+          "statement_balance": 1520.4,
+          "min_payment_due": 64.0,
+          "payment_due_date": "{{ now + 12d | format=\"date\" }}",
+          "autopay_enrolled": false,
+          "agent_notes": [
+            "Current balance $1843.27, minimum due $64.00 by the due date. Lead with the figure the customer asked for."
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-review-cases-create",
+  "description": "Meridian Card Review Desk PUBLIC API: file a card-unblock review case. Self-validates the shared REVIEW_PLATFORM token because the public path carries no API key.",
+  "method": "POST",
+  "path_slug": "mcc-review-cases-create",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": true,
+  "allowed_ips": []
+}

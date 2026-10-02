@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-case-events-list",
+  "description": "Meridian dispute pipeline: audit trail for one case or a pipeline overview with per-state counts. Read-only; used by the monitoring app.",
+  "method": "POST",
+  "path_slug": "mcc-case-events-list",
+  "param_mapping": {}
+}

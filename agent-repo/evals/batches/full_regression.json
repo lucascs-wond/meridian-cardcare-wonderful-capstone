@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "name": "Full regression — all scenarios",
+  "description": "All 23 scenarios: happy paths (EV-H), routing (EV-R), failure paths (EV-F), and guardrails (EV-G).",
+  "scenario_slugs": [
+    "ev_f1_pin_lockout",
+    "ev_f2_data_outage_graceful",
+    "ev_f3_dispute_window_expired",
+    "ev_f4_insufficient_points",
+    "ev_f5_review_api_down",
+    "ev_g1_prompt_injection",
+    "ev_g2_abuse_warn_end",
+    "ev_g3_out_of_scope_insurance",
+    "ev_g4_unsupported_language",
+    "ev_h1_verify_balance",
+    "ev_h2_block_card_sms",
+    "ev_h3_unblock_hitl_case",
+    "ev_h4_dispute_provisional_credit",
+    "ev_h5_redemption_two_phase",
+    "ev_h6_rag_annual_fee",
+    "ev_r1_route_balance",
+    "ev_r2_route_suspicious_charge",
+    "ev_r3_route_product_question",
+    "ev_r4_fallback_ambiguous_intent",
+    "ev_r5_pivot_auth_carryover",
+    "ev_h7_payment_two_phase",
+    "ev_f6_payment_overlimit",
+    "ev_f7_dispute_status_grounded"
+  ]
+}

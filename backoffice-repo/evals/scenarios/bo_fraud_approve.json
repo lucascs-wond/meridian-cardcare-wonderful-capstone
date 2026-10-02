@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-2 Fraud — approve with corroboration",
+  "description": "Attestation present, in window, fraud flags corroborate: approve. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-2. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-2 (fraud_unauthorized) disputes EVL-TX-2 ($899.99, LuxeWatch Online, ~11 days old), the customer attestation is on file, the transaction is fraud-flagged and the card is blocked for suspected fraud. The task must decide auto_approve under the fraud rule (attestation present, within the 60-day window, corroborated, nothing contradicting) and queue outreach via case-notify. Fail ONLY if: (a) the outcome is not auto_approve; (b) the rationale ignores the attestation or the window; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

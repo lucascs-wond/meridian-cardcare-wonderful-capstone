@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-attempt-record",
+  "description": "Meridian dispute pipeline: Agent 3 call-attempt disposition (idempotent).",
+  "method": "POST",
+  "path_slug": "mcc-attempt-record",
+  "param_mapping": {}
+}

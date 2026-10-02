@@ -1,0 +1,10 @@
+{
+  "name": "Case / Request Info",
+  "category": "outcome",
+  "description": "The task sent the case back to the customer for missing or conflicting evidence.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the task's case-decide call recorded outcome request_info."
+  },
+  "rules": []
+}

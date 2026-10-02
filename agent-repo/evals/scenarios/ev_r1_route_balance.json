@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "name": "EV-R1 'How much do I owe' routes to account servicing",
+  "description": "Routing: a balance question routes silently to account-servicing, with verification before any figures. Customer: Ava Thompson (CUST-1001).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The balance intent was routed to account servicing without narrating any skill switch, identity was verified before any account figure was spoken, and both answers ($1,843.27 balance, $10,156.73 available credit) match the tool output exactly.",
+    "turns": [
+      {
+        "user_message": "How much do I owe on my card?",
+        "expected_output": "Agent routes this to account servicing (switches to the account-servicing skill) and begins identity verification before giving any figures. The switch must be silent \u2014 the agent must not mention skills, routing, transfers, or 'switching'.",
+        "reference_response": "I can check that for you. First let me verify your identity \u2014 what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Agent calls verify-identity, then answers the original question with the current balance of $1,843.27 from account-get-overview (or immediately proceeds to look it up).",
+        "reference_response": "You're verified, Ava. Your current balance is $1,843.27."
+      },
+      {
+        "user_message": "And how much credit do I have left?",
+        "expected_output": "Agent states the available credit of $10,156.73 (mentioning the $12,000 limit is a plus) using account-get-overview data. It does not invent figures or re-verify the customer.",
+        "reference_response": "You have $10,156.73 in available credit out of your $12,000 limit."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "mock_output": {
+          "account_id": "ACC-2001",
+          "product_name": "Meridian Rewards+",
+          "current_balance": 1843.27,
+          "available_credit": 10156.73,
+          "credit_limit": 12000,
+          "statement_balance": 1560.44,
+          "min_payment_due": 47,
+          "payment_due_date": "{{ now + 19d | format=\"date\" }}",
+          "autopay_enrolled": true,
+          "autopay_type": "statement_balance",
+          "status": "current",
+          "agent_notes": [
+            "Speak amounts naturally (for voice). Autopay is enrolled for the statement balance."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

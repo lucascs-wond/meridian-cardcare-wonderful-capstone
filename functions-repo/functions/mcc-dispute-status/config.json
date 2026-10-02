@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-dispute-status",
+  "description": "Meridian CardCare data plane: list a customer's disputes or fetch one by id. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-dispute-status",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

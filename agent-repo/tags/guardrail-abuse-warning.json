@@ -1,0 +1,10 @@
+{
+  "name": "Guardrail / Abuse Warning",
+  "category": "guardrail",
+  "description": "The caller was abusive (profanity, threats, harassment directed at the agent) and the agent issued its one warning and/or ended the call.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the agent warns the customer about abusive language, or ends the call after continued abuse. Do not apply for mere frustration without abuse."
+  },
+  "rules": []
+}

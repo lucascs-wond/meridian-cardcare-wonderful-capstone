@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Fraud / Card Block",
+  "category": "intent",
+  "description": "Caller reported a lost or stolen card, suspected fraud, or asked to block/freeze a card.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer reports a card lost or stolen, suspects fraud on a card, or asks to block, freeze, lock, or hold a card. Apply even if the card turned out to be already blocked."
+  },
+  "rules": []
+}

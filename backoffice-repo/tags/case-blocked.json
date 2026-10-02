@@ -1,0 +1,10 @@
+{
+  "name": "Case / Blocked",
+  "category": "outcome",
+  "description": "Provenance failure: cross-account mismatch; no outreach.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the task's case-decide call recorded outcome blocked."
+  },
+  "rules": []
+}

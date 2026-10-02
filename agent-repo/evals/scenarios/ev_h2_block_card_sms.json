@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "name": "EV-H2 Block lost card and send SMS confirmation",
+  "description": "Happy path: lost card is blocked after verification, replacement ordered, SMS confirmation sent. Customer: Ava Thompson (CUST-1001), physical card ending 4821.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "Identity was verified before any card action. The card ending 4821 was blocked via the fraud-block-card tool (not merely claimed), a replacement with an ETA was communicated, and an SMS confirmation with the card_blocked template was sent. The agent only ever referenced the last 4 digits of the card, never a full card number.",
+    "turns": [
+      {
+        "user_message": "Help \u2014 I lost my credit card somewhere at the airport. I need to block it right now.",
+        "expected_output": "Brief latency filler lines like 'Let me pull up your account details' or 'One moment' are platform announcements, NOT account-data disclosures \u2014 ignore them. Agent responds with urgency/empathy to the declined-card concern and moves to identity verification before disclosing any account information or card status. Fail ONLY on actual pre-verification disclosure of account data or an account action.",
+        "reference_response": "I'm sorry to hear that \u2014 I can block it right away. First, let me verify you quickly: what's the phone number on your account?"
+      },
+      {
+        "user_message": "It's 555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thank you. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "After verification the agent secures the card: EITHER the fraud-block-card tool is called this turn, OR the agent clearly states it is blocking the card right now (block-in-progress). Asking about a replacement card in the same breath is acceptable. Choosing the physical card without asking is acceptable (the declined-at-store context implies it). Fail only if the agent neither blocks nor commits to blocking, or wanders to another topic.",
+        "reference_response": "You're verified, Ava. Just to confirm \u2014 is it your physical card ending 4821, or your virtual card?"
+      },
+      {
+        "user_message": "Yes, the physical one ending 4821. And please send me a replacement.",
+        "expected_output": "Agent calls fraud-block-card for the card ending 4821 with reason lost (or stolen), confirms the block and the replacement timeline, AND sends the SMS confirmation (calls send-sms-confirmation with the card_blocked template) or clearly states a confirmation text was sent.",
+        "reference_response": "Done \u2014 your card ending 4821 is blocked, and a replacement is on the way in 5 to 7 business days. I've just texted you a confirmation."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-block-card",
+        "mock_output": {
+          "error": "card_ambiguous",
+          "message": "Customer has more than one active card.",
+          "agent_notes": [
+            "Ava has two active cards: a physical card ending 4821 and a virtual card ending 5578.",
+            "Ask which card to block, then call fraud-block-card again with card_last4."
+          ]
+        },
+        "expected_input": {
+          "reason": {
+            "$any": true
+          },
+          "order_replacement": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-block-card",
+        "mock_output": {
+          "card_id": "CARD-3001",
+          "last4": "4821",
+          "new_status": "blocked",
+          "replacement_ordered": true,
+          "replacement_eta": "5-7 business days",
+          "agent_notes": [
+            "Card ending 4821 is now blocked and a replacement is ordered (5-7 business days).",
+            "Send the card_blocked SMS confirmation via send-sms-confirmation."
+          ]
+        },
+        "expected_input": {
+          "card_last4": {
+            "$in": [
+              "4821"
+            ]
+          },
+          "reason": {
+            "$in": [
+              "lost",
+              "stolen"
+            ]
+          },
+          "order_replacement": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "send-sms-confirmation",
+        "mock_output": {
+          "sent": true,
+          "template": "card_blocked",
+          "agent_notes": [
+            "SMS confirmation sent to the customer's phone on file."
+          ]
+        },
+        "expected_input": {
+          "template": {
+            "$in": [
+              "card_blocked"
+            ]
+          },
+          "to": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

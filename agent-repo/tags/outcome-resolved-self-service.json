@@ -1,0 +1,10 @@
+{
+  "name": "Outcome / Resolved / Self-Service",
+  "category": "outcome",
+  "description": "The caller's request was fully handled by the agent with no human transfer.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when every request the customer raised was answered or actioned by the agent and the call ended normally without transfer to a human. Do not apply if the caller abandoned mid-task or was escalated."
+  },
+  "rules": []
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Blocked (Provenance) Rate",
+  "description": "Share of dispute tasks decided blocked for cross-account/provenance failures. Any sustained value warrants investigation. Target ~0%, concern > 5%.",
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-blocked"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-no_op_duplicate"
+        }
+      ]
+    }
+  ]
+}

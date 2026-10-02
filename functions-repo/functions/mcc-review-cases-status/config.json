@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-review-cases-status",
+  "description": "Meridian Card Review Desk PUBLIC API: check an unblock review case by case_id or customer_id (token as query param). Self-validates the shared REVIEW_PLATFORM token.",
+  "method": "GET",
+  "path_slug": "mcc-review-cases-status",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": true,
+  "allowed_ips": []
+}

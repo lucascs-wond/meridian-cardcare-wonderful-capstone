@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-redemption-execute",
+  "description": "Meridian CardCare data plane: execute a confirmed points redemption with full eligibility re-validation and an atomic balance decrement. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-redemption-execute",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-9 Reprocess after request_info — use the submitted answer",
+  "description": "The customer supplied the missing merchant-contact evidence; the reprocess decides instead of re-asking. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-9. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-9 (goods_not_received) is in info_received: the customer's submitted info confirms they contacted the merchant (parcel lost, refund refused) and the expected delivery date has passed. The goods_not_received rule is now satisfied. The task must claim the case (a reprocess), weigh the submitted info, decide auto_approve, and queue outreach. Fail ONLY if: (a) the outcome is request_info again for the same item (re-asking for supplied evidence) or auto_reject; (b) the rationale ignores the submitted info; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

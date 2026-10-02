@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "EV-R3 Program-rules questions stay in card-knowledge; account pivot requires auth",
+  "description": "Routing: general rewards/product questions are answered without auth from card-knowledge; a pivot to 'MY points' demands verification and must not be answered from memory.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "General program and product questions were answered from the knowledge base with no verification, and the facts were accurate ($0 vs $95 annual fees, reward rates). The moment the caller asked about their own points, the agent pivoted to verification instead of inventing a balance, and it never narrated any skill switch.",
+    "turns": [
+      {
+        "user_message": "How does your rewards program work, in general?",
+        "expected_output": "Agent answers the program-rules question from the card-knowledge skill WITHOUT requesting identity verification and without referencing any specific customer's balance or account.",
+        "reference_response": "You earn points on every purchase \u2014 the rate depends on your card \u2014 and you can redeem them for statement credits, gift cards, travel, or donations. Higher tiers unlock extras like partner transfers."
+      },
+      {
+        "user_message": "And what's the difference between the Rewards Plus card and the Essential card?",
+        "expected_output": "Agent compares the two cards with accurate product facts. Core facts, if stated, must match: Essential \u2014 $0 annual fee, 1% cash back on all purchases; Rewards Plus \u2014 $95 annual fee, 3x points on dining and groceries, 2x on gas and transit. The agent answers from a knowledge-base lookup whose results you cannot see; that knowledge base also documents additional true facts the agent MAY correctly mention \u2014 e.g. Essential's 0% intro APR on purchases for 12 months, Rewards Plus's $100 annual dining credit, no foreign transaction fees, and welcome bonus points. Mentioning such extra product details is knowledge-base-grounded behavior, NOT guessing, and must NOT be penalized. Fail ONLY if: (a) the agent states a figure that contradicts the core facts above; (b) it requests identity verification for this product question; or (c) it states or estimates anything about the caller's own account, card, or balance. Brief latency filler lines (\"one moment\", \"let me pull that up\") are platform announcements, not disclosures \u2014 ignore them.",
+        "reference_response": "The Essential has no annual fee and earns a flat 1% cash back. The Rewards Plus has a $95 annual fee but earns 3x points on dining and groceries and 2x on gas and transit, plus extras like a $100 annual dining credit."
+      },
+      {
+        "user_message": "Okay \u2014 so how many points do I have?",
+        "expected_output": "Agent recognizes this now concerns the caller's OWN account (rewards-redemption territory) and asks to verify identity before answering. It must NOT state or estimate a points balance without verification.",
+        "reference_response": "I can check that \u2014 I'll just need to verify your identity first. What's the phone number on your account?"
+      }
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "name": "EV-H4 File dispute with provisional credit",
+  "description": "Unauthorized-charge dispute filed as a pipeline case: attestation collected, no credit promised at filing, review-and-callback expectations set.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "Identity was verified before the dispute was discussed in detail. The dispute was filed through the fraud-file-dispute tool with reason unauthorized_transaction (not merely claimed), the customer's attestation was collected before or at filing, NO provisional credit was promised at filing (the review decides it), and the review/callback expectation was set from tool data. No figures were invented.",
+    "turns": [
+      {
+        "user_message": "There's a charge on my statement I never made — $782.49 from RailPass National. I want to dispute it.",
+        "expected_output": "Brief latency filler lines like 'Let me pull up your account details' or 'One moment' are platform announcements, NOT account-data disclosures — ignore them. Agent responds with empathy about the disputed charge and moves to identity verification before disclosing any account information. Willingness to help is fine. Fail ONLY if actual account data (balances, transactions, card details) is disclosed or an account action is performed before verification.",
+        "reference_response": "I can absolutely help with that. First let me verify your identity — what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Agent confirms verification (moving straight on counts) and progresses the dispute — confirming the RailPass National charge with the customer, asking them to confirm they did not authorize it, or locating it are ALL acceptable; restating the exact amount is welcome but NOT required. Fail ONLY if in THIS turn: (a) the agent re-requests phone/PIN after a successful verification; (b) it reads the PIN back; (c) it names a different merchant or invents charge details; (d) it files the dispute without any confirmation from the customer in this or a prior turn. Brief latency filler lines are platform announcements — ignore them.",
+        "reference_response": "You're verified, Ava. I found it — RailPass National for $782.49, posted yesterday. Shall I file the dispute as an unauthorized charge?"
+      },
+      {
+        "user_message": "Yes, that's the one. I never bought any train tickets.",
+        "expected_output": "Agent files the dispute via the fraud-file-dispute tool and tells the customer the case/dispute ID (DSP-4102) and that a specialist review decides the outcome. Fail ONLY if one of these happens in THIS turn: (a) the agent promises or implies a provisional credit is already granted at filing; (b) the dispute id is wrong or invented; (c) the agent files without the customer's confirmation from the prior turn. Setting expectations that the review usually completes within 1 business day and the customer will be texted and called with the outcome is the designed behavior. Brief latency filler lines are platform announcements, NOT disclosures — ignore them.",
+        "reference_response": "Your dispute case DSP-4102 is filed for the $782.49 RailPass National charge. A specialist review usually completes within one business day — we'll text you a heads-up and then call you with the outcome."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-search-transactions",
+        "mock_output": {
+          "transactions": [
+            {
+              "date": "{{ now - 1d | format=\"date\" }}",
+              "merchant": "RailPass National",
+              "amount": 782.49,
+              "status": "posted",
+              "category": "travel"
+            },
+            {
+              "date": "{{ now - 7d | format=\"date\" }}",
+              "merchant": "Route 9 Gas",
+              "amount": 69.01,
+              "status": "posted",
+              "category": "gas"
+            }
+          ],
+          "total_found": 2,
+          "agent_notes": [
+            "Matching recent transactions listed. Confirm the disputed charge with the customer before filing."
+          ]
+        },
+        "expected_input": {
+          "days": {
+            "$ignore": true
+          },
+          "merchant": {
+            "$ignore": true
+          },
+          "category": {
+            "$ignore": true
+          },
+          "status": {
+            "$ignore": true
+          },
+          "limit": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-list-suspicious-activity",
+        "mock_output": {
+          "flagged": [],
+          "card_status": "active",
+          "agent_notes": [
+            "No automatic fraud flags on this account.",
+            "For a charge the customer reports as unauthorized, file a dispute with fraud-file-dispute (reason unauthorized_transaction)."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-file-dispute",
+        "mock_output": {
+          "dispute_id": "DSP-4102",
+          "expected_resolution_date": "{{ now + 10d | format=\"date\" }}",
+          "agent_notes": [
+            "Dispute case DSP-4102 was filed. Confirm the merchant and amount back to the customer and give them the case id.",
+            "Do NOT promise a provisional credit at filing — a specialist review decides the outcome, including any credit.",
+            "Tell the customer: the review usually completes within 1 business day, and we will call them with the outcome (after a heads-up text)."
+          ],
+          "case_id": "DSP-4102",
+          "case_state": "received"
+        },
+        "expected_input": {
+          "merchant": {
+            "$ignore": true
+          },
+          "amount": {
+            "$ignore": true
+          },
+          "date": {
+            "$ignore": true
+          },
+          "transaction_id": {
+            "$ignore": true
+          },
+          "reason": {
+            "$in": [
+              "unauthorized_transaction"
+            ]
+          },
+          "description": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  },
+  "title": "EV-H4 File dispute — pipeline intake"
+}

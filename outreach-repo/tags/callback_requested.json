@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Callback Requested",
+  "category": "outcome",
+  "description": "The customer asked to be called at an exact time.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

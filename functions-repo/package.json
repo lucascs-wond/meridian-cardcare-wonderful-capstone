@@ -1,0 +1,14 @@
+{
+  "name": "@wonderful/functions",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@wonderful/types": "^0.1.17",
+    "esbuild": "0.28.1"
+  }
+}

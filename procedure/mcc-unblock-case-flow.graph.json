@@ -1,0 +1,121 @@
+{
+ "nodes": [
+  {
+   "id": "trigger-1",
+   "ref": "trigger-1",
+   "kind": "trigger",
+   "title": "Case filed",
+   "config": {
+    "input_schema": {
+     "additionalProperties": false,
+     "properties": {
+      "card_last4": {
+       "type": "string"
+      },
+      "case_id": {
+       "type": "string"
+      },
+      "customer_id": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "case_id",
+      "customer_id",
+      "card_last4"
+     ],
+     "type": "object"
+    }
+   },
+   "x": 0,
+   "y": 0
+  },
+  {
+   "id": "wait-1",
+   "ref": "wait-1",
+   "kind": "wait",
+   "title": "Wait for reviewer decision",
+   "config": {
+    "field": "status",
+    "mode": "condition",
+    "op": "!=",
+    "poll_interval_ms": 60000,
+    "poll_interval_unit": "minutes",
+    "row_id": "{{trigger-1.case_id}}",
+    "table_name": "mcc_block_review_cases",
+    "value": "pending"
+   },
+   "x": 0,
+   "y": 150
+  },
+  {
+   "id": "branch-1",
+   "ref": "branch-1",
+   "kind": "branch",
+   "title": "Approved?",
+   "config": {
+    "left": "{{wait-1.row.data.status}}",
+    "op": "==",
+    "right": "approved"
+   },
+   "x": 0,
+   "y": 300
+  },
+  {
+   "id": "function-1",
+   "ref": "function-1",
+   "kind": "function",
+   "title": "SMS: approved",
+   "config": {
+    "params": {
+     "case_id": "{{trigger-1.case_id}}",
+     "decision": "approved"
+    },
+    "slug": "mcc-notify-unblock-decision"
+   },
+   "x": -150,
+   "y": 450
+  },
+  {
+   "id": "function-2",
+   "ref": "function-2",
+   "kind": "function",
+   "title": "SMS: denied",
+   "config": {
+    "params": {
+     "case_id": "{{trigger-1.case_id}}",
+     "decision": "denied"
+    },
+    "slug": "mcc-notify-unblock-decision"
+   },
+   "x": 150,
+   "y": 450
+  }
+ ],
+ "edges": [
+  {
+   "from": "trigger-1",
+   "to": "wait-1",
+   "port": "",
+   "label": ""
+  },
+  {
+   "from": "wait-1",
+   "to": "branch-1",
+   "port": "",
+   "label": ""
+  },
+  {
+   "from": "branch-1",
+   "to": "function-1",
+   "port": "yes",
+   "label": ""
+  },
+  {
+   "from": "branch-1",
+   "to": "function-2",
+   "port": "no",
+   "label": ""
+  }
+ ]
+}

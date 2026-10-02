@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Fraud / Unblock Request",
+  "category": "intent",
+  "description": "Caller asked to unblock or reactivate a blocked card, or asked for the status of an unblock review case.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks to unblock, unfreeze, or reactivate a blocked card, or asks about the progress of an unblock review case."
+  },
+  "rules": []
+}

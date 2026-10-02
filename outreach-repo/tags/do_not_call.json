@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Do Not Call",
+  "category": "outcome",
+  "description": "The customer opted out of further calls.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-review-cases-list",
+  "description": "Meridian Card Review Desk private API (dashboard): list unblock review cases oldest-first with status counts. Requires an API key.",
+  "method": "POST",
+  "path_slug": "mcc-review-cases-list",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

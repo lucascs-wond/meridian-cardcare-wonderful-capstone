@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-case-decide",
+  "description": "Meridian dispute pipeline: THE decision gate \u2014 validates state transitions, ownership, evidence guards, and idempotency; records outcome, internal actions, and audit events.",
+  "method": "POST",
+  "path_slug": "mcc-case-decide",
+  "param_mapping": {}
+}

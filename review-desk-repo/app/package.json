@@ -1,0 +1,47 @@
+{
+  "name": "wonderful-app-template",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader runner",
+    "build": "tsc --noEmit && vite build --configLoader runner",
+    "build:runner": "vite build --mode runner --configLoader runner",
+    "preview": "vite preview --configLoader runner",
+    "package": "node scripts/package.js",
+    "runner": "node runner/server.mjs",
+    "test": "node --test \"infra/**/*.test.mjs\""
+  },
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "@wonderful/ui-base": "0.100.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.6",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "archiver": "^7.0.1",
+    "esbuild": "0.28.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "typescript": "^5.8.2",
+    "vite": "^8.1.0",
+    "vite-plugin-svgr": "^5.2.0",
+    "ws": "^8.18.3"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "pnpm": {
+    "overrides": {
+      "lodash": ">=4.18.1",
+      "esbuild": "0.28.1",
+      "postcss": "8.5.23",
+      "brace-expansion": "2.1.2"
+    }
+  }
+}

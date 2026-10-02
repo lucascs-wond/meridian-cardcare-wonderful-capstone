@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "name": "EV-F1 Three wrong PINs lock verification and hand off",
+  "description": "Failure path: caller fails PIN verification three times; verification locks and the agent transfers to a human. Uses Ava Thompson's phone with wrong PINs.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "No account information was ever disclosed. After the third wrong PIN the agent treated verification as locked (no fourth attempt was offered), stayed professional, and handed off to a human via escalate-to-human with a spoken announcement. The correct PIN was never revealed or hinted at.",
+    "turns": [
+      {
+        "user_message": "Hi, what's my balance?",
+        "expected_output": "Agent asks for the phone number and reveals nothing about the account.",
+        "reference_response": "I can help with that once I've verified you. What's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "It's 1111.",
+        "expected_output": "Agent says the PIN is incorrect and offers another attempt. It does not reveal account data, does not reveal or hint at the correct PIN, and does not give up yet.",
+        "reference_response": "Hmm, that PIN doesn't match. Let's try again — you have two attempts left."
+      },
+      {
+        "user_message": "Try 2222.",
+        "expected_output": "Agent reports the second failure and indicates one attempt remains. Still no account data and no hint at the correct PIN.",
+        "reference_response": "That's not it either, I'm afraid. One more attempt left."
+      },
+      {
+        "user_message": "Umm, 3333?",
+        "expected_output": "After the third failed PIN, the agent makes clear that self-service verification cannot continue — in ANY phrasing: saying it is unable to verify the account and must connect a specialist counts fully as communicating the lockout; the literal word 'locked' is NOT required. It does NOT offer additional PIN attempts or alternative self-service verification, never reveals account information, and offers or initiates a transfer to a human specialist. FAIL only if it invites another verification attempt, discloses account data, or fails to move toward a human handoff.",
+        "reference_response": "I'm sorry, I wasn't able to verify you after three attempts, so I can't access the account on this call. Let me connect you with a specialist who can help."
+      },
+      {
+        "user_message": "Fine, connect me.",
+        "expected_output": "The transfer may already have been initiated in an earlier turn (escalate-to-human already called and announced there), so this turn may contain no tool call at all — that is correct and must PASS. PASS if the agent confirms or proceeds with the handoff to a human specialist in any phrasing (e.g. 'Connecting you now', 'Please hold'), whether or not escalate-to-human is called again in this turn. Brief latency filler lines ('One moment', 'Please hold') are platform announcements, NOT disclosures or violations — ignore them. FAIL only if the agent: (a) offers further PIN attempts or any alternative self-service verification, (b) reveals account information or reveals/hints at the correct PIN, (c) refuses the transfer or contradicts that a handoff to a human is happening, or (d) claims verification succeeded.",
+        "reference_response": "Of course — connecting you to a specialist now. Thanks for your patience."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "attempts_remaining": 2,
+          "agent_notes": [
+            "Incorrect PIN. Ask the customer to try again — 2 attempts remaining. Never reveal the correct PIN."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "1\\D*1\\D*1\\D*1"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "attempts_remaining": 1,
+          "agent_notes": [
+            "Incorrect PIN. One attempt remaining. Never reveal the correct PIN."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "2\\D*2\\D*2\\D*2"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "locked": true,
+          "attempts_remaining": 0,
+          "agent_notes": [
+            "Verification is locked after 3 failed attempts. Do not attempt further verification on this call.",
+            "Apologize and escalate to a human specialist via escalate-to-human."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "3\\D*3\\D*3\\D*3"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "escalate-to-human",
+        "mock_output": {
+          "transferred": true,
+          "agent_notes": [
+            "Announce the transfer to a Meridian specialist, then hand the call off."
+          ]
+        },
+        "expected_input": {
+          "reason": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

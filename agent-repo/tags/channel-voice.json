@@ -1,0 +1,24 @@
+{
+  "name": "Channel / Voice",
+  "category": "channel",
+  "description": "The interaction took place on the voice channel.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "type": "metadata",
+          "parameters": {
+            "key": "channel",
+            "operator": "eq",
+            "value": "voice"
+          }
+        }
+      ]
+    }
+  ]
+}

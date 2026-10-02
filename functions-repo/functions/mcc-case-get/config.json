@@ -1,0 +1,8 @@
+{
+  "kind": "http",
+  "name": "mcc-case-get",
+  "description": "Meridian dispute pipeline: read-only evidence bundle for a case (transaction, siblings, card status, ownership, rulebook flags). Called by the backoffice agent.",
+  "method": "POST",
+  "path_slug": "mcc-case-get",
+  "param_mapping": {}
+}

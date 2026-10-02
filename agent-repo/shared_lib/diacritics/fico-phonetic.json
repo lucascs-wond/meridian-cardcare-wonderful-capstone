@@ -1,0 +1,12 @@
+{
+  "display_name": "FICO phonetic",
+  "description": "Brand-name pronunciation: 'FY-koh', not spelled letters or 'fee-co'.",
+  "pattern_options": [
+    {
+      "regexables": [
+        { "type": "literal", "value": "FICO" }
+      ]
+    }
+  ],
+  "replacement": "FY-koh"
+}

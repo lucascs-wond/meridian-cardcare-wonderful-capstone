@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-account-overview",
+  "description": "Meridian CardCare data plane: balance, credit, and payment overview for one account with status-specific speaking guidance. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-account-overview",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

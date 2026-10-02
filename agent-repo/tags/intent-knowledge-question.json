@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Knowledge / Question",
+  "category": "intent",
+  "description": "Caller asked a general product, fee, APR, rewards-program-rules, application, policy, or credit-education question needing no account access.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks about product benefits, annual fees, APRs, how the rewards program works, eligibility/applications, company policies, or general credit education. Do not apply when the question is about the caller's own account, card, or points."
+  },
+  "rules": []
+}

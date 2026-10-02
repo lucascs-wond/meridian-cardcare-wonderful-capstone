@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "name": "BO-4 Missing evidence — request info, never deny",
+  "description": "Goods not received with merchant contact never recorded: request_info, never a rejection. State-seeded integration eval: run scripts/seed_backoffice_cases.py before the batch.",
+  "channel": "backoffice",
+  "eval_type": "backoffice_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "backoffice_task": {
+      "task_type": "dispute_case",
+      "trigger_type": "webhook",
+      "task_input": "Webhook delivery: dispute case event for case_id EVL-BO-4. Claim and process this case.",
+      "context": {},
+      "expected_task_status": "completed",
+      "expected_behavior": "Seeded facts: case EVL-BO-4 (goods_not_received) has NO merchant-contact evidence recorded and NO expected delivery date. That is MISSING evidence. The task must decide request_info with required_info naming the specific missing items (merchant contact and/or expected delivery date) and queue outreach to collect it. Fail ONLY if: (a) the outcome is auto_reject (denying for missing evidence) or auto_approve; (b) required_info does not name the specific missing item; (c) case-notify is never called.",
+      "judge_evidence": {
+        "mode": "full_trace_capped"
+      }
+    },
+    "turns": []
+  }
+}

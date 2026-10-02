@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Rewards / Redemption",
+  "category": "intent",
+  "description": "Caller asked to redeem points or explored redemption options for their own account.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks what they can redeem points for, requests a redemption quote, or confirms/cancels a redemption."
+  },
+  "rules": []
+}

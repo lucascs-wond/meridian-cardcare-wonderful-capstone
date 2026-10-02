@@ -1,0 +1,10 @@
+{
+  "name": "Intent / Account / Balance Inquiry",
+  "category": "intent",
+  "description": "Caller asked about their balance, available credit, credit limit, minimum payment, or payment due date.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the customer asks about their own current balance, statement balance, available credit, credit limit, minimum payment due, or payment due date. Do not apply for questions about product pricing or how interest works in general."
+  },
+  "rules": []
+}

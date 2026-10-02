@@ -1,0 +1,19 @@
+{
+  "name": "card-knowledge",
+  "display_name": "Card Knowledge",
+  "description": "General product and policy questions needing no account access: product benefits, fees, APRs, rewards program rules, applications, credit education, and company policies \u2014 answered from the knowledge base. Does NOT handle anything about this caller's own account, card, points, or transactions (those go to the verified skills). No identity verification required.",
+  "prompts": {
+    "skill": "prompts/skill.md"
+  },
+  "tools": {},
+  "knowledge_bases": {
+    "meridian_kb": {}
+  },
+  "diacritics": [
+    "apr-spellout",
+    "cvv-spellout",
+    "fico-phonetic",
+    "rewards-plus-brand",
+    "autopay-hyphenation"
+  ]
+}

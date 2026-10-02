@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "name": "EV-F3 Dispute outside 60-day window is explained, not filed",
+  "description": "Failure path: the disputed charge is older than 60 days; the agent explains the policy instead of filing. Customer: Ava Thompson (CUST-1001), CityRide $329.17 from months ago.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent did not file a dispute for an out-of-window charge and did not promise any provisional credit. It clearly explained the 60-day policy in plain language and offered legitimate alternatives. All account access happened only after identity verification.",
+    "turns": [
+      {
+        "user_message": "I want to dispute a ride charge from CityRide from a few months back — they overcharged me.",
+        "expected_output": "Agent routes to dispute handling and starts identity verification.",
+        "reference_response": "I can look into that. First, let me verify your identity — what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Agent acknowledges that verification succeeded (e.g. greets the caller by name or says they're all set) and moves the dispute forward in EITHER of two equally valid ways: (a) it references the located CityRide charge (its $329.17 amount and/or date), OR (b) it asks the caller for identifying details of the charge — date, exact amount, or merchant — so it can locate it. Asking for those details is the designed step (the dispute tool searches by merchant/amount/date), so do NOT penalize the agent for not mentioning $329.17 — that figure comes from tool output it may not have queried yet, and judges cannot see tool outputs. Brief latency filler lines ('One moment', 'Let me pull up your account') are platform announcements, NOT disclosures — ignore them. Fail ONLY if the agent: (1) does not treat the caller as verified after the correct PIN, (2) reads the PIN back to the caller, (3) files the dispute or promises a credit or outcome in this turn, or (4) neither confirms a located charge nor asks for any identifying detail of it.",
+        "reference_response": "You're verified, Ava. I found a CityRide charge for $329.17 from a few months ago — is that the one?"
+      },
+      {
+        "user_message": "Yes, that's it. $329.17. File the dispute.",
+        "expected_output": "Acceptable paths this turn: (a) the agent files the dispute, hits the expired-window response, and explains the 60-day policy with empathy; or (b) the agent asks ONE final confirmation question (e.g. the dispute reason) before filing. FAIL only if the agent refuses to file for any reason other than the 60-day window, invents a different policy, or promises the dispute will succeed.",
+        "reference_response": "I'm sorry — that charge is outside our 60-day dispute window, so I'm not able to file a dispute for it. You could contact CityRide directly, and if you believe the charge is fraudulent rather than a billing error, we can still take a look."
+      },
+      {
+        "user_message": "That's annoying. What's this 60-day thing anyway?",
+        "expected_output": "Agent gives a brief, accurate explanation of the 60-day dispute window consistent with Meridian's implemented policy: disputes must be raised within 60 days of the TRANSACTION (charge) date — that is what the system enforces, so saying 'transaction date', 'charge date', or 'the date of the charge' is CORRECT and must PASS; generic phrasing like 'within 60 days' with no date anchor also passes. FAIL only if the agent invents a different number of days, promises to override or make an exception to the window, or contradicts having just declined the dispute.",
+        "reference_response": "Card disputes have to be raised within 60 days of the transaction date — that's the window in which we can take a billing dispute to the merchant's bank. Outside it, contacting the merchant directly is usually the best path."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-search-transactions",
+        "mock_output": {
+          "transactions": [
+            {
+              "date": "{{ now - 100d | format=\"date\" }}",
+              "merchant": "CityRide",
+              "amount": 329.17,
+              "status": "posted",
+              "category": "travel"
+            }
+          ],
+          "total_found": 1,
+          "agent_notes": [
+            "One matching CityRide charge found. Note the transaction date is more than 60 days old."
+          ]
+        },
+        "expected_input": {
+          "days": {
+            "$ignore": true
+          },
+          "merchant": {
+            "$ignore": true
+          },
+          "category": {
+            "$ignore": true
+          },
+          "status": {
+            "$ignore": true
+          },
+          "limit": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-file-dispute",
+        "mock_output": {
+          "error": "dispute_window_expired",
+          "message": "This transaction is outside the 60-day dispute window.",
+          "agent_notes": [
+            "The dispute cannot be filed — the charge is older than 60 days.",
+            "Explain the 60-day dispute policy. Offer to contact the merchant directly, and mention a fraud review remains possible if the customer believes the charge is fraudulent."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

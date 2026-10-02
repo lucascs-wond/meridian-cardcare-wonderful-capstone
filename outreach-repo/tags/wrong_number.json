@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Wrong Number",
+  "category": "outcome",
+  "description": "The number did not reach the case's customer.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

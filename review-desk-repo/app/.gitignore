@@ -1,0 +1,7 @@
+# No trailing slash: a sandbox clone links node_modules in as a SYMLINK, and
+# "node_modules/" matches directories only — git would happily commit the link.
+node_modules
+dist/
+runner-dist/
+*.local
+.claude/worktrees

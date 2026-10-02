@@ -1,0 +1,9 @@
+{
+  "kind": "http",
+  "name": "mcc-case-notify",
+  "description": "Meridian dispute pipeline: queues customer outreach by creating one idempotent Campaign consumer (external_id = case_id) with safe payload. Never for blocked cases.",
+  "service_account_id": "<redacted-id>",
+  "method": "POST",
+  "path_slug": "mcc-case-notify",
+  "param_mapping": {}
+}

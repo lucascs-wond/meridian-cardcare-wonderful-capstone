@@ -1,0 +1,10 @@
+{
+  "name": "Disposition / Info Collected",
+  "category": "outcome",
+  "description": "The missing information was collected and sent back to the review.",
+  "llm_configuration": {
+    "enabled": false,
+    "context": ""
+  },
+  "rules": []
+}

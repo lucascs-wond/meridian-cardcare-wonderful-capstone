@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "name": "EV-R5 Mid-call pivot keeps verification across skills",
+  "description": "Routing fallback/recovery: after a balance check, the caller pivots to blocking a card; the switch is silent and verification carries over \u2014 no re-verification. Customer: Ava Thompson (CUST-1001).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "One verification covered the whole call: the mid-conversation pivot from balance to card-blocking was handled with a silent skill switch and NO re-verification. The block was executed via fraud-block-card with the SMS confirmation sent, and all figures matched tool outputs.",
+    "turns": [
+      {
+        "user_message": "What's my current balance?",
+        "expected_output": "Agent starts identity verification before any figures.",
+        "reference_response": "I can check that. First let me verify you \u2014 what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "After the caller supplies the PIN, the agent treats verification as complete and states the current balance of $1,843.27 (natural voice phrasing such as 'one thousand eight hundred forty-three dollars and twenty-seven cents' counts; mentioning extra correct account details like the payment due date is fine). Proceeding directly to the balance IS an acceptable implicit confirmation of verification \u2014 an explicit phrase like 'you're verified' is NOT required. Brief latency filler lines ('Checking your balance now', 'One moment') are platform announcements, NOT disclosures \u2014 ignore them. Fail ONLY if one of these happens in THIS turn: (a) the agent states a balance figure other than $1,843.27; (b) the agent refuses to provide the balance or asks the caller to verify again (re-requests the phone number or PIN); (c) the agent reads the caller's PIN back to them; (d) the agent disclosed the balance before the PIN was accepted.",
+        "reference_response": "You're verified, Ava. Your current balance is $1,843.27."
+      },
+      {
+        "user_message": "Actually, forget the balance \u2014 I think I dropped my card at the mall. Block the physical one ending 4821 and send me a new one.",
+        "expected_output": "Agent switches silently to fraud handling and blocks the card ending 4821 WITHOUT asking the customer to verify again (no new phone or PIN request \u2014 auth carries over). It calls fraud-block-card, confirms the replacement, and sends or clearly commits to the card_blocked SMS.",
+        "reference_response": "Of course \u2014 I've blocked your card ending 4821 and ordered a replacement; it'll arrive in 5 to 7 business days. I've also texted you a confirmation."
+      },
+      {
+        "user_message": "Perfect, thanks. That's all.",
+        "expected_output": "Agent closes politely, optionally recapping the block and replacement. It performs no further verification and no unnecessary tool calls.",
+        "reference_response": "You're all set, Ava: card ending 4821 blocked, replacement on the way, confirmation texted. Thanks for calling Meridian \u2014 goodbye!"
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "mock_output": {
+          "account_id": "ACC-2001",
+          "product_name": "Meridian Rewards+",
+          "current_balance": 1843.27,
+          "available_credit": 10156.73,
+          "credit_limit": 12000,
+          "statement_balance": 1560.44,
+          "min_payment_due": 47,
+          "payment_due_date": "{{ now + 19d | format=\"date\" }}",
+          "autopay_enrolled": true,
+          "autopay_type": "statement_balance",
+          "status": "current",
+          "agent_notes": [
+            "Speak amounts naturally (for voice). Autopay is enrolled for the statement balance."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-block-card",
+        "mock_output": {
+          "card_id": "CARD-3001",
+          "last4": "4821",
+          "new_status": "blocked",
+          "replacement_ordered": true,
+          "replacement_eta": "5-7 business days",
+          "agent_notes": [
+            "Card ending 4821 blocked; replacement ordered (5-7 business days).",
+            "Send the card_blocked SMS confirmation."
+          ]
+        },
+        "expected_input": {
+          "card_last4": {
+            "$in": [
+              "4821"
+            ]
+          },
+          "reason": {
+            "$in": [
+              "lost",
+              "stolen"
+            ]
+          },
+          "order_replacement": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "send-sms-confirmation",
+        "mock_output": {
+          "sent": true,
+          "template": "card_blocked",
+          "agent_notes": [
+            "SMS confirmation sent to the customer's phone on file."
+          ]
+        },
+        "expected_input": {
+          "template": {
+            "$in": [
+              "card_blocked"
+            ]
+          },
+          "to": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

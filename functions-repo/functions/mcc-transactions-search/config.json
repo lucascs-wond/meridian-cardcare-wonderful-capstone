@@ -1,0 +1,11 @@
+{
+  "kind": "http",
+  "name": "mcc-transactions-search",
+  "description": "Meridian CardCare data plane: search an account's transactions by window, merchant, category, or status. Called privately via context.functions.run.",
+  "method": "POST",
+  "path_slug": "mcc-transactions-search",
+  "param_mapping": {},
+  "timeout_ms": 30000,
+  "is_public": false,
+  "allowed_ips": []
+}

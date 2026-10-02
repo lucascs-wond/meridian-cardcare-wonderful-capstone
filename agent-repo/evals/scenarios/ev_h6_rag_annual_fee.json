@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "EV-H6 Product question answered from knowledge base without auth",
+  "description": "Happy path: general product question is answered from the card-knowledge RAG skill with no identity verification and no account access.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "Both product questions were answered from the card-knowledge skill without requesting identity verification and without calling any account, fraud, or rewards tools. The stated facts are correct per the knowledge base: Voyager annual fee $395, no foreign transaction fees. The agent did not guess at pricing beyond the knowledge base.",
+    "turns": [
+      {
+        "user_message": "What's the annual fee on the Voyager card?",
+        "expected_output": "Agent answers directly from product knowledge WITHOUT asking the customer to verify identity: the Voyager annual fee is $395. Mentioning offsetting benefits like the $300 travel credit is a plus, but the $395 figure must be stated.",
+        "reference_response": "The Meridian Voyager has a $395 annual fee \u2014 it comes with a $300 annual travel credit, lounge access, and no foreign transaction fees."
+      },
+      {
+        "user_message": "And does it charge foreign transaction fees?",
+        "expected_output": "Agent states the Voyager card has no (0%) foreign transaction fees. No identity verification is requested and no account data is referenced.",
+        "reference_response": "No \u2014 the Voyager has no foreign transaction fees."
+      }
+    ]
+  }
+}

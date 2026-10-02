@@ -1,0 +1,10 @@
+{
+  "name": "Outcome / Escalated / Verification Lockout",
+  "category": "outcome",
+  "description": "The caller failed identity verification (3 attempts or DOB fallback failure) and was locked out, triggering escalation.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the agent tells the customer that identity verification failed after repeated attempts and that they must be transferred to a specialist or call back. Do not apply for a single wrong PIN that later succeeded."
+  },
+  "rules": []
+}

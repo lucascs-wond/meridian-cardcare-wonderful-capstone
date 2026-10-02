@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "name": "OV-H3 Exact-time callback",
+  "description": "Customer answers but asks to be called back tomorrow at 6 PM. Agent confirms the time and timezone, schedules the platform callback, records callback_requested, ends without disclosing case details (never verified).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "turns": [
+      {
+        "user_message": "Hello?",
+        "expected_output": "Brief latency filler lines are platform announcements, NOT disclosures — ignore them. Agent opens as Mia from Meridian Card Services about the recent dispute on the card and asks for Ava / whether it is a good time. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or required information. Fail ONLY if case details are disclosed."
+      },
+      {
+        "user_message": "Oh — this really isn't a good time, I'm walking into a meeting. Can you call me back tomorrow at 6 in the evening?",
+        "expected_output": "Agent accepts and moves to confirm the exact time, ideally including the timezone ('tomorrow at 6 PM — Eastern time?'). Asking a clarifying question about the time or timezone is the designed behavior; scheduling immediately is also acceptable. Fail ONLY if in THIS turn: (a) the agent discloses case details (customer is NOT verified); (b) the agent refuses the callback or pushes to keep talking; (c) the agent asks for credentials."
+      },
+      {
+        "user_message": "Yes, 6 PM my time, I'm in New York. That works.",
+        "expected_output": "Agent schedules the callback via the schedule-callback tool and confirms it back in the customer's terms (tomorrow at 6 PM Eastern), then says goodbye. Fail ONLY if: (a) no scheduling attempt is made in this turn; (b) case details are disclosed; (c) the agent promises anything beyond the callback."
+      }
+    ],
+    "conversation_prompt": "The agent scheduled the platform callback via schedule-callback exactly once for the requested time, confirmed the time back to the customer, recorded exactly one disposition (callback_requested) with the time in the summary, and never disclosed case details (the customer was never verified — only the safe purpose was named). Ending the call after the goodbye is the designed behavior. No credentials were ever requested.",
+    "start_tool_mocks": [
+      {
+        "tool_name": "call-briefing",
+        "expected_input": {},
+        "mock_output": {
+          "case_id": "DSP-7003",
+          "first_name": "Ava",
+          "dispute_type": "fraud_unauthorized",
+          "outcome": "auto_approve",
+          "amount": 782.49,
+          "rationale_plain": null,
+          "required_info": null,
+          "provisional_credit": true,
+          "opening_variant": "trust_first",
+          "agent_notes": [
+            "Briefing loaded for Ava, case DSP-7003 (auto_approve). Use the trust_first opening.",
+            "Verify (name + date of birth via confirm-identity) before ANY case detail beyond the safe purpose."
+          ]
+        }
+      },
+      {
+        "tool_name": "schedule-callback",
+        "expected_input": {},
+        "mock_output": {
+          "scheduled_for": "2026-09-01T22:00:00.000Z",
+          "agent_notes": [
+            "Callback scheduled. Confirm the exact date and time back to the customer in their own local terms (tomorrow at 6 PM Eastern).",
+            "Then record disposition callback_requested with the time in the summary, say goodbye, and end the call."
+          ]
+        }
+      },
+      {
+        "tool_name": "record-call-disposition",
+        "expected_input": {},
+        "mock_output": {
+          "business_code": "callback_requested",
+          "attempt_id": "ATT-EVAL-H3",
+          "agent_notes": ["Disposition recorded. Finish the goodbye and end the call."]
+        }
+      }
+    ]
+  }
+}

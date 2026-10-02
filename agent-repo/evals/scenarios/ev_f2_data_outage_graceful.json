@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "name": "EV-F2 Data function outage handled gracefully",
+  "description": "Failure path: the account data function is down after verification; the agent must not invent figures and must offer alternatives. Customer: Ava Thompson (CUST-1001).",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "When the account-data tool failed, the agent stayed honest: it never fabricated or estimated a balance, it apologized, explained the temporary outage in plain language, offered alternatives, and completed a handoff to a human when asked. Verification still happened before any lookup was attempted.",
+    "turns": [
+      {
+        "user_message": "Hello, I need to check my balance.",
+        "expected_output": "Agent starts identity verification.",
+        "reference_response": "Sure \u2014 first let me verify you. What's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "After receiving the PIN, the agent proceeds toward the balance lookup. Verification confirmation may be explicit ('You're verified, Ava') OR implicit \u2014 moving straight to the account lookup after the PIN is accepted counts as confirmation. Brief latency filler lines ('Checking your PIN now', 'One moment') are platform announcements, NOT disclosures or verification failures \u2014 ignore them. If the account-data lookup fails within this same turn, it is acceptable for the agent to apologize, explain a temporary system issue, retry, offer alternatives, and/or initiate a specialist transfer here. Fail ONLY if the agent: (a) reads the PIN back to the caller, (b) states, invents, or estimates any balance, credit, or payment figure, or (c) re-asks for credentials already provided or refuses to proceed after successful verification.",
+        "reference_response": "You're verified, Ava. One moment while I pull up your balance."
+      },
+      {
+        "user_message": "So, how much do I owe?",
+        "expected_output": "The agent must not state, invent, or estimate any balance, credit, or payment figure. If the system outage was already explained and/or a specialist transfer was already initiated in an earlier turn, a brief restatement, continued handling of the handoff, or offering an alternative (try again later, app, SMS follow-up, specialist) all pass \u2014 the agent is NOT required to repeat the full outage explanation. Fail ONLY if the agent: (a) states any specific monetary figure, (b) contradicts an earlier outage explanation (e.g., claims the account system is working and quotes data), or (c) gives no apology, no alternative, and no reference to a handoff at all.",
+        "reference_response": "I'm really sorry \u2014 our account system isn't responding right now, so I can't pull up your balance. You can try again in a few minutes, check the app, or I can connect you with a specialist."
+      },
+      {
+        "user_message": "Ugh. Just get me a person then.",
+        "expected_output": "The agent gets the caller to a human. Calling escalate-to-human in this turn passes; equally, if escalate-to-human was already called in an earlier turn, confirming or reiterating the in-progress transfer WITHOUT a duplicate escalation call also passes. Fail ONLY if the agent: (a) refuses or deflects the request for a human, (b) contradicts an earlier transfer announcement, or (c) states any invented balance, credit, or payment figure.",
+        "reference_response": "Of course \u2014 connecting you with a specialist now. Sorry again for the trouble."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-get-overview",
+        "mock_output": {
+          "error": "function_unavailable",
+          "message": "The account service is temporarily unavailable.",
+          "agent_notes": [
+            "The data lookup failed after a retry. Apologize and DO NOT guess or estimate any figures.",
+            "Offer to try again shortly, an SMS follow-up, or a transfer to a specialist."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "escalate-to-human",
+        "mock_output": {
+          "transferred": true,
+          "agent_notes": [
+            "Announce the transfer to a Meridian specialist, then hand the call off."
+          ]
+        },
+        "expected_input": {
+          "reason": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

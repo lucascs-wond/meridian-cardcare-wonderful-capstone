@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "Smoke suite — happy paths",
+  "description": "The 6 EV-H happy-path scenarios (verify+balance, block card, HITL unblock, dispute with provisional credit, two-phase redemption, RAG annual fee). Fast go/no-go signal after a deploy.",
+  "scenario_slugs": [
+    "ev_h1_verify_balance",
+    "ev_h2_block_card_sms",
+    "ev_h3_unblock_hitl_case",
+    "ev_h4_dispute_provisional_credit",
+    "ev_h5_redemption_two_phase",
+    "ev_h6_rag_annual_fee",
+    "ev_h7_payment_two_phase"
+  ]
+}

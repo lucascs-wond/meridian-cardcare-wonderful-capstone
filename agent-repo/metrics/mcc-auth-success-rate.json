@@ -1,0 +1,54 @@
+{
+  "name": "Auth Success Rate",
+  "description": "Of sessions where identity verification was needed (any auth-gated intent tag), the share that did not end in a verification lockout. Sessions with no auth-gated intent are excluded, not counted as failures. Target >= 85%, concern < 70%.",
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "not",
+          "tag_slug": "outcome-escalated-verification-lockout"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "not",
+          "tag_slug": "intent-account-balance-inquiry"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-account-transactions"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-account-contact-update"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-fraud-card-block"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-fraud-dispute"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-fraud-unblock-request"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-rewards-balance"
+        },
+        {
+          "operator": "not",
+          "tag_slug": "intent-rewards-redemption"
+        }
+      ]
+    }
+  ]
+}

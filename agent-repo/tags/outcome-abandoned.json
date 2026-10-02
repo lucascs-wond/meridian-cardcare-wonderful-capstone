@@ -1,0 +1,10 @@
+{
+  "name": "Outcome / Abandoned",
+  "category": "outcome",
+  "description": "The caller left mid-task: hung up, went silent past the inactivity timeout, or declined to continue before resolution.",
+  "llm_configuration": {
+    "enabled": true,
+    "context": "Apply when the conversation ends before the customer's request is completed \u2014 hang-up mid-flow, inactivity timeout, or the customer explicitly giving up. Do not apply when the request finished or the call was transferred."
+  },
+  "rules": []
+}

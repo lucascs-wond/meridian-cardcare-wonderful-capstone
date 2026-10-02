@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "name": "OV-H1 Deliver an approval",
+  "description": "Trust-first opening, DOB verification, approval delivered with credit timing, disposition completed.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "turns": [
+      {
+        "user_message": "Hello?",
+        "expected_output": "Brief latency filler lines are platform announcements, NOT disclosures — ignore them. Agent opens as Mia FROM Meridian Card Services about the recent card dispute, asks for/confirms Ava, and asks if it is a good time. Fail ONLY if it discloses the outcome, amount, or merchant before verification, or asks for a PIN/password/code. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested."
+      },
+      {
+        "user_message": "Yes, this is Ava. Now works.",
+        "expected_output": "Agent asks to verify with date of birth before any case detail. Fail ONLY if it asks for PIN/password/codes or discloses case details first. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested."
+      },
+      {
+        "user_message": "March 14th, 1988.",
+        "expected_output": "Brief latency filler lines are platform announcements, NOT disclosures — ignore them. Agent confirms verification and delivers the outcome: the dispute was approved and a provisional credit of $782.49 posts within 2 business days, no action needed. Fail ONLY if: (a) the amount is wrong; (b) it asks for sensitive credentials; (c) it claims something not in the briefing. Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested."
+      },
+      {
+        "user_message": "Oh that's great news. Thank you!",
+        "expected_output": "Agent wraps up warmly and the call heads to a close; recording the disposition via the tool in this or the next turn is expected. Fail ONLY if it reopens case details incorrectly or asks for credentials."
+      }
+    ],
+    "conversation_prompt": "The agent identified itself and the bank, confirmed the person and verified date of birth BEFORE any case detail, delivered the auto_approve outcome with the $782.49 provisional credit and 2-business-day timing from the briefing, never asked for PIN/password/codes, and recorded exactly one disposition (completed). Naming the SAFE PURPOSE — 'about the recent dispute on your card' — is the designed opening and NOT a disclosure; a disclosure means amounts, merchant names, the outcome, or the specific information requested.",
+    "start_tool_mocks": [
+      {
+        "tool_name": "call-briefing",
+        "expected_input": {},
+        "mock_output": {
+          "case_id": "DSP-7001",
+          "first_name": "Ava",
+          "dispute_type": "fraud_unauthorized",
+          "outcome": "auto_approve",
+          "amount": 782.49,
+          "rationale_plain": "The charge was confirmed unauthorized.",
+          "required_info": null,
+          "provisional_credit": true,
+          "opening_variant": "trust_first",
+          "agent_notes": [
+            "Briefing loaded for Ava, case DSP-7001 (auto_approve). Use the trust_first opening.",
+            "Verify (name + date of birth via confirm-identity) before ANY case detail beyond the safe purpose."
+          ]
+        }
+      },
+      {
+        "tool_name": "confirm-identity",
+        "expected_input": {
+          "date_of_birth": {
+            "$regex": ".*1988.*"
+          }
+        },
+        "mock_output": {
+          "verified": true,
+          "agent_notes": [
+            "Verified. Call clear-eot-delay, then deliver the outcome per the briefing."
+          ]
+        }
+      },
+      {
+        "tool_name": "confirm-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "attempts_left": 1,
+          "agent_notes": [
+            "That date of birth does not match. Ask once more, carefully (month, day, year)."
+          ]
+        }
+      },
+      {
+        "tool_name": "record-call-disposition",
+        "expected_input": {
+          "business_code": {
+            "$regex": ".*completed.*"
+          }
+        },
+        "mock_output": {
+          "attempt_id": "ATT-EVAL",
+          "attempt_number": 1,
+          "business_code": "completed",
+          "agent_notes": [
+            "Disposition recorded. Finish the goodbye and end the call."
+          ]
+        }
+      },
+      {
+        "tool_name": "record-call-disposition",
+        "expected_input": {},
+        "mock_output": {
+          "attempt_id": "ATT-EVAL",
+          "attempt_number": 1,
+          "business_code": "recorded",
+          "agent_notes": [
+            "Disposition recorded. Finish the goodbye and end the call."
+          ]
+        }
+      },
+      {
+        "tool_name": "set-eot-delay",
+        "expected_input": {},
+        "mock_output": {
+          "agent_notes": [
+            "Extended pause active. Ask for the digits now."
+          ]
+        }
+      },
+      {
+        "tool_name": "clear-eot-delay",
+        "expected_input": {},
+        "mock_output": {
+          "agent_notes": [
+            "Normal listening pace restored."
+          ]
+        }
+      }
+    ]
+  }
+}

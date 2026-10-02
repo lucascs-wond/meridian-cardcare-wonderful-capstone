@@ -1,0 +1,26 @@
+{
+  "name": "Request-Info Rate",
+  "description": "Share of decided cases sent back to the customer for missing or conflicting evidence. High values mean intake is not capturing evidence. Target <= 30%, concern > 50%.",
+  "rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-request_info"
+        }
+      ]
+    }
+  ],
+  "exclusion_rules": [
+    {
+      "operator": "and",
+      "conditions": [
+        {
+          "operator": "has",
+          "tag_slug": "case-no_op_duplicate"
+        }
+      ]
+    }
+  ]
+}

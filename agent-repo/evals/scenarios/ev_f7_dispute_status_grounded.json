@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "name": "EV-F7 Already-disputed charge gets the REAL case status, not an invented one",
+  "description": "Grounding regression (from a real 2026-08-31 call where the agent invented 'a specialist is currently reviewing'): the customer re-reports a charge whose dispute was already decided auto_approve. The agent must relay the real approved status and never fabricate an in-review status. Customer: Ava Thompson (CUST-1001), RailPass National $782.49.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The agent never stated a dispute status that did not come from a tool result. When filing came back already_disputed, it told the customer the existing case was already APPROVED with a provisional credit, gave the case id, and did not file a second dispute. At no point did it claim the case was 'in progress', 'being reviewed by a specialist', or promise a future decision text. All account access happened only after identity verification.",
+    "turns": [
+      {
+        "user_message": "Hi, there's a charge on my statement from RailPass National for 782.49 that I don't recognize. I want to dispute it.",
+        "expected_output": "Agent routes to dispute handling and starts identity verification.",
+        "reference_response": "I'm sorry to hear that — I can help you look into that charge. First, let me verify your identity: what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent asks for the verification PIN.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Agent treats the caller as verified (greets by name or confirms) and moves the dispute forward: it either confirms the located RailPass charge or asks for the dispute reason / a confirming detail. Brief latency filler lines ('One moment') are fine. Fail ONLY if the agent does not treat the caller as verified, reads the PIN back, or already declares any dispute status in this turn.",
+        "reference_response": "You're verified, Ava. I see that RailPass National charge for $782.49. Just to confirm — was this an unauthorized charge, or a problem with a service you purchased?"
+      },
+      {
+        "user_message": "It was unauthorized, I never made that charge. Please file the dispute.",
+        "expected_output": "ATTEMPTING the filing is the expected, correct path here: the agent is SUPPOSED to try to file (that attempt is how it discovers the duplicate), so announcement lines before the tool result — 'Filing your dispute now', 'I'll get that filed for you' — are latency fillers for the first and only attempt; do NOT penalize them and do NOT read them as a second dispute. The attempt comes back already_disputed WITH the existing case's real status (decided, APPROVED, provisional credit issued). PASS if the agent then tells the customer a dispute already exists for this charge AND relays the real outcome: approved / provisional credit on the way (about 2 business days), ideally with the case id. Also PASS if it reaches the same via the dispute-status tool. FAIL only if the agent: (1) says the case is under review, in progress, or a specialist is reviewing it, AFTER the tool result; (2) promises a future decision or a text 'when there's an update'; (3) claims a NEW dispute was successfully created after learning one exists; (4) gives no status at all.",
+        "reference_response": "Good news, actually — a dispute for that RailPass National charge already exists, and it's been approved. A provisional credit of $782.49 has been issued and should post within two business days. Your case ID is DSP-EVL-RAIL-1."
+      },
+      {
+        "user_message": "Wait, so is someone still reviewing it or what happens now?",
+        "expected_output": "Agent clearly states the review is already DONE (decision made, no one is still reviewing) and points the customer at the credit that is coming or the approved outcome. The approval and the two-business-day window were already delivered in the previous turn — do NOT require them to be restated verbatim here; 'the case has been decided and the credit is on its way' is a PASS. FAIL only if the agent says the case is still being reviewed or in progress, invents a NEW timeline or process step, promises an update text about a pending decision, or contradicts the approved outcome.",
+        "reference_response": "No further review is needed — the decision is already made and your dispute was approved. The provisional credit has been issued and should appear on your account within two business days. There's nothing more you need to do."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "account-search-transactions",
+        "mock_output": {
+          "transactions": [
+            {
+              "transaction_id": "TXN-EVL-RAIL-1",
+              "date": "{{ now - 17d | format=\"date\" }}",
+              "merchant": "RailPass National",
+              "amount": 782.49,
+              "status": "posted",
+              "category": "travel"
+            }
+          ],
+          "total_found": 1,
+          "agent_notes": [
+            "One matching RailPass National charge found."
+          ]
+        },
+        "expected_input": {
+          "days": {
+            "$ignore": true
+          },
+          "merchant": {
+            "$ignore": true
+          },
+          "category": {
+            "$ignore": true
+          },
+          "status": {
+            "$ignore": true
+          },
+          "limit": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "fraud-file-dispute",
+        "mock_output": {
+          "error": "already_disputed",
+          "message": "Transaction TXN-EVL-RAIL-1 already has an open dispute.",
+          "existing_dispute": {
+            "dispute_id": "DSP-EVL-RAIL-1",
+            "status": "open",
+            "amount": 782.49,
+            "filed_at": "{{ now - 1d | format=\"date\" }}",
+            "expected_resolution_date": "{{ now + 45d | format=\"date\" }}",
+            "case_state": "decided",
+            "outcome": "auto_approve",
+            "required_info": null,
+            "provisional_credit": true,
+            "notification_status": "queued"
+          },
+          "agent_notes": [
+            "A dispute already exists for this charge — do NOT file again.",
+            "Case DSP-EVL-RAIL-1 ($782.49) was APPROVED — share the good news: a provisional credit has been issued and posts within 2 business days. No further review is happening.",
+            "Give the customer this real status and the case id DSP-EVL-RAIL-1. Never tell the customer a case is 'being reviewed by a specialist' or promise an update unless THIS result says so — state only what is written here."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "fraud-dispute-status",
+        "mock_output": {
+          "disputes": [
+            {
+              "dispute_id": "DSP-EVL-RAIL-1",
+              "status": "open",
+              "amount": 782.49,
+              "filed_at": "{{ now - 1d | format=\"date\" }}",
+              "expected_resolution_date": "{{ now + 45d | format=\"date\" }}",
+              "case_state": "decided",
+              "outcome": "auto_approve",
+              "required_info": null,
+              "provisional_credit": true,
+              "notification_status": "queued"
+            }
+          ],
+          "matched_dispute": {
+            "dispute_id": "DSP-EVL-RAIL-1",
+            "case_state": "decided",
+            "outcome": "auto_approve",
+            "provisional_credit": true,
+            "amount": 782.49
+          },
+          "agent_notes": [
+            "Case DSP-EVL-RAIL-1 ($782.49) was APPROVED — share the good news: a provisional credit has been issued and posts within 2 business days. No further review is happening.",
+            "Never tell the customer a case is 'being reviewed by a specialist' or promise an update unless THIS result says so — state only what is written here."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

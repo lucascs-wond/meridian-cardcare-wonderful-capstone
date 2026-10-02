@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "name": "EV-H5 Two-phase points redemption (quote then confirm)",
+  "description": "Happy path: redemption is quoted first, executed only after explicit confirmation. Customer: Ava Thompson (CUST-1001), 48,210 points, gold tier.",
+  "channel": "voice",
+  "eval_type": "chat_eval",
+  "instructions": {
+    "mode": "turn_based",
+    "conversation_prompt": "The redemption followed the two-phase confirm flow: the agent quoted 20,000 points = $200 first, asked for explicit confirmation, and only executed after the customer said yes. Balances and values match the tool outputs (48,210 before, 28,210 after). Identity was verified before any rewards data was shared.",
+    "turns": [
+      {
+        "user_message": "Hi, I'd like to use my points for a statement credit.",
+        "expected_output": "Brief latency filler lines like 'Let me pull up your account details' or 'One moment' are platform announcements, NOT account-data disclosures \u2014 ignore them. Agent moves to identity verification before any rewards information is disclosed. Willingness to help is fine. Fail ONLY on actual pre-verification disclosure of account/rewards data.",
+        "reference_response": "Happy to help with your rewards. First, let me verify you \u2014 what's the phone number on your account?"
+      },
+      {
+        "user_message": "555-010-0101.",
+        "expected_output": "Agent proceeds from the phone number to requesting the customer's 4-digit phone-banking PIN. An explicit 'that matches' is nice but NOT required \u2014 moving to the PIN after looking up the phone implies the match. Asking the customer to provide their PIN is the designed verification step, never a violation (only a read-back of the PIN's value would be). Fail only if the agent skips the phone lookup entirely, reveals the PIN value, or discloses account data before verification completes.",
+        "reference_response": "Thanks. And your 4-digit verification PIN?"
+      },
+      {
+        "user_message": "4821.",
+        "expected_output": "Agent confirms verification and addresses the rewards balance: EITHER states the 48,210-point balance (from rewards-get-summary) OR clearly initiates/announces the balance lookup before discussing amounts. It does not ask how many points to redeem without referencing the balance or looking it up.",
+        "reference_response": "You're verified, Ava. You have 48,210 points available. How many would you like to redeem for a statement credit?"
+      },
+      {
+        "user_message": "Let's do 20,000 points as a statement credit.",
+        "expected_output": "The agent reads back the quote (20,000 points for a $200 statement credit) and asks the customer to confirm BEFORE completing the redemption. NOTE: a call to the rewards-redeem-points tool WITHOUT user confirmation is the designed QUOTE phase \u2014 it does not deduct points and is NOT an execution; do not fail for it. Fail only if the agent's reply claims the redemption is already complete / points already deducted before the customer says yes, or if it never asks for confirmation.",
+        "reference_response": "That would be 20,000 points for a $200 statement credit. Shall I go ahead?"
+      },
+      {
+        "user_message": "Yes, go ahead.",
+        "expected_output": "Agent executes the redemption (calls rewards-redeem-points with confirmation) and reports the completed redemption with the new points balance of 28,210.",
+        "reference_response": "Done! I've redeemed 20,000 points for a $200 statement credit. Your new balance is 28,210 points, and the credit posts within 2 business days."
+      }
+    ],
+    "start_tool_mocks": [
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": false,
+          "status": "pin_pending",
+          "agent_notes": [
+            "Phone matched a Meridian customer. Ask for the 4-digit verification PIN.",
+            "Never read the PIN back to the caller."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "mock_output": {
+          "verified": true,
+          "first_name": "Ava",
+          "agent_notes": [
+            "Identity verified for Ava. Proceed with the customer's request.",
+            "Verification persists for the rest of the session, including across skill switches."
+          ]
+        },
+        "expected_input": {
+          "phone": {
+            "$ignore": true
+          },
+          "pin": {
+            "$regex": "4821"
+          },
+          "date_of_birth": {
+            "$ignore": true
+          }
+        }
+      },
+      {
+        "tool_name": "rewards-get-summary",
+        "mock_output": {
+          "points_balance": 48210,
+          "points_pending": 1843,
+          "tier": "gold",
+          "points_expiring_next_90d": 0,
+          "lifetime_points": 197455,
+          "agent_notes": [
+            "Speak the balance naturally. No points are expiring in the next 90 days."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "rewards-list-redemption-options",
+        "mock_output": {
+          "options": [
+            {
+              "option_id": "RED-CASH",
+              "name": "Statement credit",
+              "min_points": 2500,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-GIFT",
+              "name": "Gift cards",
+              "min_points": 2500,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-CHARITY",
+              "name": "Charitable donation",
+              "min_points": 1000,
+              "dollar_value_per_1000_points": 10,
+              "eligible": true
+            },
+            {
+              "option_id": "RED-TRAVEL",
+              "name": "Travel portal booking",
+              "min_points": 5000,
+              "dollar_value_per_1000_points": 12.5,
+              "eligible": false,
+              "ineligible_reason": "Travel portal redemptions are for Voyager cardholders"
+            },
+            {
+              "option_id": "RED-TRANSFER",
+              "name": "Transfer to airline/hotel partners",
+              "min_points": 10000,
+              "dollar_value_per_1000_points": 10,
+              "eligible": false,
+              "ineligible_reason": "Partner transfers require platinum tier"
+            }
+          ],
+          "best_value_note": "Statement credit redeems at 1 cent per point.",
+          "agent_notes": [
+            "Only offer options marked eligible."
+          ]
+        },
+        "expected_input": {}
+      },
+      {
+        "tool_name": "rewards-redeem-points",
+        "mock_output": {
+          "quoted": true,
+          "option_id": "RED-CASH",
+          "option_name": "Statement credit",
+          "points": 20000,
+          "value_usd": 200,
+          "agent_notes": [
+            "Quote only \u2014 nothing has been redeemed yet.",
+            "Read the quote back (20,000 points for a $200 statement credit) and ask the customer to confirm before calling the tool again with confirm: true."
+          ]
+        },
+        "expected_input": {
+          "option_id": {
+            "$ignore": true
+          },
+          "option_name": {
+            "$ignore": true
+          },
+          "points": {
+            "$any": true
+          }
+        }
+      },
+      {
+        "tool_name": "rewards-redeem-points",
+        "mock_output": {
+          "quoted": true,
+          "option_id": "RED-CASH",
+          "option_name": "Statement credit",
+          "points": 20000,
+          "value_usd": 200,
+          "agent_notes": [
+            "Quote only \u2014 nothing has been redeemed yet.",
+            "Read the quote back (20,000 points for a $200 statement credit) and ask the customer to confirm before calling the tool again with confirm: true."
+          ]
+        },
+        "expected_input": {
+          "option_id": {
+            "$ignore": true
+          },
+          "option_name": {
+            "$ignore": true
+          },
+          "points": {
+            "$ignore": true
+          },
+          "confirm": {
+            "$in": [
+              false
+            ]
+          }
+        }
+      },
+      {
+        "tool_name": "rewards-redeem-points",
+        "mock_output": {
+          "redemption_id": "RDM-7105",
+          "points_spent": 20000,
+          "value_usd": 200,
+          "new_balance": 28210,
+          "agent_notes": [
+            "Redemption complete. New balance: 28,210 points.",
+            "The statement credit posts within 2 business days."
+          ]
+        },
+        "expected_input": {
+          "option_id": {
+            "$ignore": true
+          },
+          "option_name": {
+            "$ignore": true
+          },
+          "points": {
+            "$ignore": true
+          },
+          "confirm": {
+            "$in": [
+              true
+            ]
+          }
+        }
+      },
+      {
+        "tool_name": "verify-identity",
+        "expected_input": {},
+        "mock_output": {
+          "verified": false,
+          "agent_notes": [
+            "No caller ID is available. Ask the customer for the phone number on their account, then call verify-identity again with it."
+          ]
+        }
+      }
+    ]
+  }
+}

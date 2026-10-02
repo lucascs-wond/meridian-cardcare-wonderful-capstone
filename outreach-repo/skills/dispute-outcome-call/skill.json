@@ -1,0 +1,38 @@
+{
+  "name": "dispute-outcome-call",
+  "display_name": "Dispute Outcome Call",
+  "description": "The outbound dispute call: brief, verify, deliver the outcome (or collect the requested information), record exactly one disposition.",
+  "tools": {
+    "call-briefing": {
+      "type": "programmable",
+      "config": {}
+    },
+    "confirm-identity": {
+      "type": "programmable",
+      "config": {}
+    },
+    "submit-case-info": {
+      "type": "programmable",
+      "config": {}
+    },
+    "record-call-disposition": {
+      "type": "programmable",
+      "config": {}
+    },
+    "set-eot-delay": {
+      "type": "programmable",
+      "config": {}
+    },
+    "clear-eot-delay": {
+      "type": "programmable",
+      "config": {}
+    },
+    "schedule-callback": {
+      "type": "programmable",
+      "config": {}
+    }
+  },
+  "prompts": {
+    "skill": "prompts/skill.md"
+  }
+}
